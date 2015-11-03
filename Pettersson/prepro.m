@@ -9,8 +9,7 @@ function EOGv = prepro(datapath, starttime, trialpar)
 %   3. Epochs of EEG data (EOG only);
 %   4. Time information of each epoch.
 %TRIALPAR has 4 fields at most: trigger (numeric), continuous ('yes' or
-%'no'), triallen (numeric) and trialprepost (a row vector with two
-%elements).
+%'no') and trialprepost (a row vector with two elements).
 
 %Check input parameters.
 if ~isfield(trialpar, 'trigger') ...
@@ -26,23 +25,21 @@ if ~isfield(trialpar, 'continuous')
         trialpar.continuous = 'no';
     else
         trialpar.continuous = 'yes';
-        if ~isfield(trialpar, 'triallen')
-            trialpar.triallen = inf; %Indicates that if only trigger specified, read the full continuous data.
-        end
+    end
+end
+
+%Check configuration.
+if strcmpi(trialpar.continuous, 'yes')
+    if length(trialpar.trigger) ~= 2
+        error('Continuous data will be read, and the number of triggers of the trial begin and end are not right.');
     end
 else
-    if strcmpi(trialpar.continuous, 'yes')
-        if ~isfield(trialpar, 'triallen')
-            trialpar.triallen = inf; %Defaultly read the full continous data.
-        end
-    else
-        if ~isfield(trialpar, 'trialprepost') ...
-                || isempty(trialpar.trialprepost) ...
-                || any(isnan(trialpar.trialprepost))
-            pre  = input('You used trialwise analysis, how long is the trial before the stimulus (Unit:sec)? Please input a number:\n');
-            post = input('And how long is the trial after the stimulus (Unit:sec)? Please input a number:\n');
-            trialpar.trialprepost = [pre, post]; %User input its trial parameters.
-        end
+    if ~isfield(trialpar, 'trialprepost') ...
+            || isempty(trialpar.trialprepost) ...
+            || any(isnan(trialpar.trialprepost))
+        pre  = input('You used epoch analysis, how long is the trial before the stimulus (Unit:sec)? Please input a number:\n');
+        post = input('And how long is the trial after the stimulus (Unit:sec)? Please input a number:\n');
+        trialpar.trialprepost = [pre, post]; %User input its trial parameters.
     end
 end
 
@@ -59,12 +56,12 @@ for ifile = 1:length(filesName)
         cfg.trialdef.eventtype  = 'STATUS';
         cfg.trialdef.eventvalue = trialpar.trigger;
         if strcmpi(trialpar.continuous, 'yes')
-            cfg.trialdef.triallength = trialpar.triallen;
+            cfg.trialfun             = 'btcontinuous'; %Use a user defined trial function, see help BTCONTINUOUS.
         else
-            cfg.trialdef.prestim    = trialpar.trialprepost(1);
-            cfg.trialdef.poststim   = trialpar.trialprepost(2);
+            cfg.trialdef.prestim     = trialpar.trialprepost(1);
+            cfg.trialdef.poststim    = trialpar.trialprepost(2);
         end
-        cfg        = ft_definetrial(cfg);
+        cfg                     = ft_definetrial(cfg);
         %Configuration for filtering.
         cfg.bpfilter            = 'yes';
         cfg.bpfreq              = [0.5 20];
@@ -74,14 +71,14 @@ for ifile = 1:length(filesName)
         cfg                     = [];
         cfg.resamplefs          = 256;
         cfg.detrend             = 'no';
-        dataPrepro = ft_resampledata(cfg, dataPrepro);
+        dataPrepro              = ft_resampledata(cfg, dataPrepro);
         %From the start time to the start point.
         startpoint = floor(dataPrepro.fsample * starttime) + 1;
         %Calculate the vertical EOG data.
         EOGv(ifile).pid     = subid(ifile); %#ok<*AGROW>
         EOGv(ifile).fsample = dataPrepro.fsample;
-        EOGv(ifile).trial = cell(size(dataPrepro.trial)); 
-        EOGv(ifile).time = cell(size(dataPrepro.trial));
+        EOGv(ifile).trial   = cell(size(dataPrepro.trial)); 
+        EOGv(ifile).time    = cell(size(dataPrepro.trial));
         for triali = 1:length(dataPrepro.trial)    
             EOGv(ifile).trial{triali} = dataPrepro.trial{triali}(1, startpoint:end) - dataPrepro.trial{triali}(2, startpoint:end);
             EOGv(ifile).time{triali}  = dataPrepro.time{triali}(startpoint:end);            
