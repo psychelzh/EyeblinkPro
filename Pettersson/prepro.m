@@ -1,4 +1,4 @@
-function EOGv = prepro(datapath, starttime, trialpar)
+function outEOGv = prepro(datapath, starttime, trialpar)
 %This function is used to do some prepocessing for all the EEG data stored
 %in .bdf (Biosemi) files using FieldTrip. EOG data is extracted and stored
 %in the generated file EOG.mat as variable EOGv, which is a structure
@@ -8,8 +8,10 @@ function EOGv = prepro(datapath, starttime, trialpar)
 %   not the original sampling rate.)
 %   3. Epochs of EEG data (EOG only);
 %   4. Time information of each epoch.
-%TRIALPAR has 4 fields at most: trigger (numeric), continuous ('yes' or
+%TRIALPAR has 3 fields at most: trigger (numeric), continuous ('yes' or
 %'no') and trialprepost (a row vector with two elements).
+
+%By Zhang, Liang, 2015/11/4. E-mail:psychelzh@gmail.com.
 
 %Check input parameters.
 if ~isfield(trialpar, 'trigger') ...
@@ -47,7 +49,10 @@ end
 filesInfo = dir([datapath, '\*.bdf']);
 filesName = {filesInfo.name};
 subid = str2double(regexp(filesName, '\d{4}', 'match', 'once'));
-for ifile = 1:length(filesName)
+totalfilenum = length(filesName);
+fprintf('found %d files.\n', totalfilenum);
+for ifile = 1:totalfilenum
+    fprintf('now preprocessing %dth file...\n', ifile);
     try
         %Configuration for trial definition.
         cfg                     = [];
@@ -80,7 +85,9 @@ for ifile = 1:length(filesName)
         EOGv(ifile).trial   = cell(size(dataPrepro.trial)); 
         EOGv(ifile).time    = cell(size(dataPrepro.trial));
         for triali = 1:length(dataPrepro.trial)    
-            EOGv(ifile).trial{triali} = dataPrepro.trial{triali}(1, startpoint:end) - dataPrepro.trial{triali}(2, startpoint:end);
+            EOGv(ifile).trial{triali} = [dataPrepro.trial{triali}(1, startpoint:end); ...
+                dataPrepro.trial{triali}(2, startpoint:end); ...
+                dataPrepro.trial{triali}(1, startpoint:end) - dataPrepro.trial{triali}(2, startpoint:end)];
             EOGv(ifile).time{triali}  = dataPrepro.time{triali}(startpoint:end);            
         end        
     catch exception
@@ -100,3 +107,4 @@ for ifile = 1:length(filesName)
 end
 %Save EOGv only.
 save(sprintf('EOG_%s_%s', datapath, datestr(now, 'HH-MM')), 'EOGv');
+if nargout == 1, outEOGv = EOGv; end
