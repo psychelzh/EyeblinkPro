@@ -1,7 +1,12 @@
-function visualres = viscntcontinuous(datafile)
+function visualres = viscntcontinuous(datafile, start)
 %VISUALCOUNT plot the data for visual inspection to count eye blinks.
 
 %By Zhang, Liang, 2015/11/4.
+
+%Check input parameters.
+if nargin == 1
+    start = 1;
+end
 
 %Load data.
 load(datafile);
@@ -15,7 +20,7 @@ reslabel = {'PID', 'NumBlink', 'Duration', 'Note'};
 visualcountres = cell(datalength, 4);
 %Error handling.
 try
-    for isub = 1:datalength
+    for isub = start:datalength
         fprintf('now processing %d...\n', EOGv(isub).pid);
         if ~isempty(EOGv(isub).trial)
             %Plot data with the eeglab gui.
