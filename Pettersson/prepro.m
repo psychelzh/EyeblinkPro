@@ -73,7 +73,7 @@ for ifile = 1:1%totalfilenum
         cfg.dataset             = [datapath, '\', filesName{ifile}];
         cfg.channel             = trialpar.channel;
         cfg.trialdef.eventtype  = 'STATUS';
-        cfg.trialdef.eventvalue = trialpar.trigger;
+        cfg.trialdef.eventvalue = mod(trialpar.trigger, 16) * 16 + 15;
         if strcmpi(trialpar.continuous, 'yes')
             cfg.trialfun             = 'btcontinuous'; %Use a user defined trial function, see help BTCONTINUOUS.
         else
