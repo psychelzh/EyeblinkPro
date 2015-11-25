@@ -65,7 +65,7 @@ filesName = {filesInfo.name};
 subid = str2double(regexp(filesName, '\d{4}', 'match', 'once'));
 totalfilenum = length(filesName);
 fprintf('found %d files.\n', totalfilenum);
-for ifile = 1:1%totalfilenum
+for ifile = 1:totalfilenum
     fprintf('now preprocessing %dth file...\n', ifile);
     try
         %Configuration for trial definition.
