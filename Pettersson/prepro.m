@@ -9,10 +9,13 @@ function [outEOGv, outEOGh] = prepro(datapath, trialpar)
 %   3. Epochs of EEG data (EOG only);
 %   4. Time information of each epoch.
 %
-%TRIALPAR has 6 fields at most: trigger (numeric), continuous ('yes' or
-%'no'), trialprepost (a row vector with two elements), channel (specify
-%all of the channels selected for analysis, default {'EXG3' 'EXG4'}),
-%starttime (specify if all the data in each trial will be used or not).
+%TRIALPAR has these fields at most:
+%   trigger (numeric)
+%   continuous ('yes' or 'no')
+%   trialprepost (a row vector with two elements)
+%   channel (specify all of the channels selected for analysis, default {'EXG3' 'EXG4'})
+%   starttime (specify if all the data in each trial will be used or not)
+%   
 %
 %See also FT_DEFINETRIAL, FT_TRIALFUN_GENERAL, FT_PREPROCESSING
 
