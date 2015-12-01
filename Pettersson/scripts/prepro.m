@@ -152,7 +152,12 @@ for ifile = 1:totalfilenum
         fclose(fid);
     end
 end
-%Save EOGv only.
-save(sprintf('EOG_%s_%s', datapath, datestr(now, 'HH-MM')), 'EOGv', 'EOGh');
+%Save EOGv and EOGh only.
+cur_path = fileparts(mfilename('fullpath'));
+save_data_path = [fileparts(cur_path), filesep, 'ResData'];
+[~, fname] = fileparts(datapath);
+save_data_name = sprintf('EOG_%s_%s', fname, datestr(now, 'mm-dd_MM-HH'));
+save([save_data_path, filesep, save_data_name], 'EOGv', 'EOGh');
+fprintf('Save done!\nEOG data saved to folder %s as %s.mat.\n', save_data_path, save_data_name);
 if nargout > 1, outEOGh = EOGh; end
 if nargout > 0, outEOGv = EOGv; end
