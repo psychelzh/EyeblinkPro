@@ -85,9 +85,9 @@ for ifile = 1:totalfilenum
         end
         cfg                     = ft_definetrial(cfg);
         %Configuration for filtering.
-        cfg.hpfilter            = 'yes';
-        cfg.hpfreq              = 0.1;
-        cfg.hpfilttype          = 'fir';
+        cfg.bpfilter            = 'yes';
+        cfg.bpfreq              = [0.5, 20];
+        cfg.bpfilttype          = 'fir';
         dataPrepro = ft_preprocessing(cfg);
         %Configuration for resampling.
         cfg                     = [];
