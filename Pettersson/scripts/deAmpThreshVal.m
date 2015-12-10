@@ -1,4 +1,4 @@
-function val = deAmpThreshVal(vec, start)
+function [val, gof] = deAmpThreshVal(vec, start)
 %DEAMPTHRESHVAL is exclusively used in finding the blink analysis.
 
 % Initiated by Zhang, Liang. 3/26/2015.
@@ -16,5 +16,5 @@ for i = start:length(vec) - 1
     [~, gofp] = fit((i:length(vec))', double(Dp'), 'poly1');
     sse(i) = gofn.sse + gofp.sse;
 end
-[~, ind] = min(sse);
+[gof, ind] = min(sse);
 val = vec(ind);
