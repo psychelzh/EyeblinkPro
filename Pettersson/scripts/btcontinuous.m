@@ -51,6 +51,13 @@ if length(sel) == 2
     trl(1) = event(sel(1)).sample;
     trl(2) = event(sel(2)).sample;
     trl(3) = 0;
+elseif ~isempty(sel) && mod(length(sel), 2) == 0
+    trl = nan(length(sel) / 2, 3);
+    for itrl = 1:length(sel) / 2
+        trl(itrl, 1) = event(sel(1 + 2 * (itrl - 1))).sample;
+        trl(itrl, 2) = event(sel(2 + 2 * (itrl - 1))).sample;
+        trl(itrl, 3) = 0;
+    end
 else
     error('no trials were defined');
 end
