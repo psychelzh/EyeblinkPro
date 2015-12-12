@@ -6,6 +6,8 @@ function [trl, event] = btcontinuous(cfg)
 %   cfg.trialdef.eventtype = 'string'
 %   cfg.trialdef.eventvalue = row vector with two numeric elements,
 %       originally is used to denote the begin and the end of the EEG task.
+%   cfg.trialdef.minevent = one numeric scalar, denoting the minimal events
+%       one trial should have.
 %See also FT_DEFINETRIAL, FT_TRIALFUN_GENERAL
 
 %Check if the trial definition specified.
@@ -47,15 +49,14 @@ end
 sel = find(sel);
 
 %Generate the trl matrix.
-if length(sel) == 2
-    trl(1) = event(sel(1)).sample;
-    trl(2) = event(sel(2)).sample;
-    trl(3) = 0;
-elseif ~isempty(sel) && mod(length(sel), 2) == 0
-    trl = nan(length(sel) / 2, 3);
-    for itrl = 1:length(sel) / 2
-        trl(itrl, 1) = event(sel(1 + 2 * (itrl - 1))).sample;
-        trl(itrl, 2) = event(sel(2 + 2 * (itrl - 1))).sample;
+if ~isempty(sel)
+    dis = diff(sel);
+    loctrl = find(~(dis < cfg.trialdef.minevent)); %One trial must contain enough events.
+    ntrl = length(loctrl);
+    trl = nan(ntrl, 3);
+    for itrl = 1:ntrl
+        trl(itrl, 1) = event(sel(loctrl(itrl))).sample;
+        trl(itrl, 2) = event(sel(loctrl(itrl) + 1)).sample;
         trl(itrl, 3) = 0;
     end
 else
