@@ -7,10 +7,18 @@ dataFilesInfo = dir([datapath, filesep, 'EOG*']);
 dataFilesName = {dataFilesInfo.name};
 totalfilenum = length(dataFilesName);
 logid = fopen('readerror.log', 'w');
+%Set a file for recording finished files.
+logfinished = [datapath, filesep, 'LAST'];
+if exist(logfinished, 'file')
+    finished = load(logfinished);
+    startfile = finished(end) + 1;
+else
+    startfile = 1;
+end
 %Give information of rate of progress.
 multiWaitbar('CloseAll');
 multiWaitbar('Global Task', 0);
-for ifile = 1:totalfilenum
+for ifile = startfile:totalfilenum
     %Check cancel information.
     rop = (ifile - 1) / totalfilenum;
     multiWaitbar('Global Task', rop);
@@ -75,6 +83,7 @@ for ifile = 1:totalfilenum
     blink_res = table(pid, nblink, task_dur, rate_blink, stat);
     save([datapath, filesep, 'blink_res_', taskname], 'blink_res');
     multiWaitbar(['Processing Task: ', taskname], 'Close');
+    dlmwrite(logfinished, ifile, '-append');
 end
 multiWaitbar('CloseAll');
 fclose(logid);
