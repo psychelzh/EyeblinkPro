@@ -39,12 +39,12 @@ tic
 for ifile = startfile:totalfilenum
     initialVarsF = who;
     %For information of timing.
-    elapsedtime = toc;
+    elapsedtimeF = toc;
     rop = (ifile - startfile) / (totalfilenum - startfile + 1);
     if rop == 0
         remTimeFile = nan;
     else
-        remTimeFile = elapsedtime * (1 - rop) / rop;
+        remTimeFile = elapsedtimeF * (1 - rop) / rop;
     end
     etaF = iGetTimeString(remTimeFile);
     %Refresh waitbar "Global Task".
@@ -74,17 +74,21 @@ for ifile = startfile:totalfilenum
         multiWaitbar(['Processing Task: ', taskname], 0);
     end
     fprintf('Processing task: %s. Estimated remaining time: %s\n', taskname, etaF);
-    if startsubj > 1
-        if exist(dataname, 'file')
-            load(dataname)
-            pid = blink_res.pid;
-            nblink = blink_res.nblink;
-            task_dur = blink_res.task_dur;
-            rate_blink = blink_res.rate_blink;
-            stat = blink_res.stat;
-        else
-            fprintf(logid, 'Data file %s not found, please have a check later.\n', dataname);
+    if ifile == startfile
+        if startsubj > 1
+            if exist(dataname, 'file')
+                load(dataname)
+                pid = blink_res.pid;
+                nblink = blink_res.nblink;
+                task_dur = blink_res.task_dur;
+                rate_blink = blink_res.rate_blink;
+                stat = blink_res.stat;
+            else
+                fprintf(logid, 'Data file %s not found, please have a check later.\n', dataname);
+            end
         end
+    else
+        startsubj = 1;
     end
     for isub = startsubj:nsubj
         blink_res = table(pid, nblink, task_dur, rate_blink, stat);
@@ -93,11 +97,12 @@ for ifile = startfile:totalfilenum
         dlmwrite(logfinished, [ifile, isub - 1]); %Completed "isub - 1" subjects.
         initialVarsS = who;
         %For information of timing.
+        elapsedtimeS = toc;
         ros = (isub - startsubj) / (nsubj - startsubj + 1);
         if ros == 0
             remTimeTask = nan;
         else
-            remTimeTask = elapsedtime * (1 - ros) / ros;
+            remTimeTask = (elapsedtimeS - elapsedtimeF) * (1 - ros) / ros;
         end
         etaS = iGetTimeString(remTimeTask);
         %Refresh subtask waitbar.
