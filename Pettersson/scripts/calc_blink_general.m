@@ -15,13 +15,24 @@ if exist(logfinished, 'file')
 else
     startfile = 1;
 end
+%Determine whether to show multiwaitbar or not.
+switch computer
+    case {'PCWIN', 'PCWIN64'}
+        useWaitBar = true;
+    otherwise
+        useWaitBar = false;
+end
 %Give information of rate of progress.
-multiWaitbar('CloseAll');
-multiWaitbar('Global Task', 0);
+if useWaitBar
+    multiWaitbar('CloseAll');
+    multiWaitbar('Global Task', 0);
+end
 for ifile = startfile:totalfilenum
-    %Check cancel information.
-    rop = (ifile - 1) / totalfilenum;
-    multiWaitbar('Global Task', rop);
+    %Refresh waitbar "Global Task".
+    if useWaitBar
+        rop = (ifile - 1) / totalfilenum;
+        multiWaitbar('Global Task', rop);
+    end
     thisFile = dataFilesName{ifile};
     load([datapath, filesep, thisFile])
     nsubj = length(EOG);
@@ -39,11 +50,16 @@ for ifile = startfile:totalfilenum
     else 
         starttime = 0;
     end
-    multiWaitbar(['Processing Task: ', taskname], 0);
+    %Add a subtask waitbar.
+    if useWaitBar
+        multiWaitbar(['Processing Task: ', taskname], 0);
+    end
     for isub = 1:nsubj
-        %Check cancel information.
-        ros = (isub - 1) / nsubj;
-        multiWaitbar(['Processing Task: ', taskname], ros);
+        %Refresh subtask waitbar.
+        if useWaitBar
+            ros = (isub - 1) / nsubj;
+            multiWaitbar(['Processing Task: ', taskname], ros);
+        end
         pid(isub) = EOG(isub).pid;
         fprintf('Now processing %d\n', pid(isub));
         if isempty(EOG(isub).EOGv)
@@ -82,8 +98,12 @@ for ifile = startfile:totalfilenum
     end
     blink_res = table(pid, nblink, task_dur, rate_blink, stat);
     save([datapath, filesep, 'blink_res_', taskname], 'blink_res');
-    multiWaitbar(['Processing Task: ', taskname], 'Close');
     dlmwrite(logfinished, ifile, '-append');
+    if useWaitBar
+        multiWaitbar(['Processing Task: ', taskname], 'Close');
+    end
 end
-multiWaitbar('CloseAll');
+if useWaitBar
+    multiWaitbar('CloseAll');
+end
 fclose(logid);
