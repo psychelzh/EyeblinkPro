@@ -149,14 +149,12 @@ for ifile = 1:totalfilenum
     catch
         fid = fopen('errlog.log', 'w');
         fprintf(fid, 'Error found while reading file %s.\n', [datapath, '\', filesName{ifile}]);
-        EOG(ifile).pid     = subid(ifile);
-        if ~exist('dataPrepro', 'var') 
-            EOG(ifile).fsample = nan;
-        else
+        if exist('dataPrepro', 'var') 
+            EOG(ifile).pid     = subid(ifile);
+            EOG(ifile).fsample = dataPrepro.fsample;
             for i = 1:size(coi, 1)
                 EOGloc.(locFields{i}) = find(ismember(trialpar.channel, coi(i, :)));
                 if ~isempty(EOGloc.(locFields{i}))
-                    EOG(ifile).fsample = dataPrepro.fsample;
                     EOG(ifile).(outFields{i}).trial   = {};
                     EOG(ifile).(outFields{i}).time    = {};
                 end
