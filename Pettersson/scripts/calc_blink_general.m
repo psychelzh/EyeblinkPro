@@ -34,11 +34,21 @@ if useWaitBar
     multiWaitbar('CloseAll');
     multiWaitbar('Global Task', 0);
 end
+%For time estimation.
+tic
 for ifile = startfile:totalfilenum
     initialVarsF = who;
+    %For information of timing.
+    elapsedtime = toc;
+    rop = (ifile - startfile) / (totalfilenum - startfile + 1);
+    if rop == 0
+        remTimeFile = nan;
+    else
+        remTimeFile = elapsedtime * (1 - rop) / rop;
+    end
+    etaF = iGetTimeString(remTimeFile);
     %Refresh waitbar "Global Task".
     if useWaitBar
-        rop = (ifile - 1) / totalfilenum;
         multiWaitbar('Global Task', rop);
     end
     thisFile = dataFilesName{ifile};
@@ -63,6 +73,7 @@ for ifile = startfile:totalfilenum
     if useWaitBar
         multiWaitbar(['Processing Task: ', taskname], 0);
     end
+    fprintf('Processing task: %s. Estimated remaining time: %s\n', taskname, etaF);
     if startsubj > 1
         if exist(dataname, 'file')
             load(dataname)
@@ -81,13 +92,20 @@ for ifile = startfile:totalfilenum
         %Set a file for recording finished files.
         dlmwrite(logfinished, [ifile, isub - 1]); %Completed "isub - 1" subjects.
         initialVarsS = who;
+        %For information of timing.
+        ros = (isub - startsubj) / (nsubj - startsubj + 1);
+        if ros == 0
+            remTimeTask = nan;
+        else
+            remTimeTask = elapsedtime * (1 - ros) / ros;
+        end
+        etaS = iGetTimeString(remTimeTask);
         %Refresh subtask waitbar.
         if useWaitBar
-            ros = (isub - 1) / nsubj;
             multiWaitbar(['Processing Task: ', taskname], ros);
         end
         pid(isub) = EOG(isub).pid;
-        fprintf('Now processing %d\n', pid(isub));
+        fprintf('Now processing %d. Estimated remaining time for this task: %s\n', pid(isub), etaS);
         if isempty(EOG(isub).EOGv)
             continue
         end
