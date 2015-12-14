@@ -7,13 +7,20 @@ dataFilesInfo = dir([datapath, filesep, 'EOG*']);
 dataFilesName = {dataFilesInfo.name};
 totalfilenum = length(dataFilesName);
 logid = fopen('readerror.log', 'w');
-%Set a file for recording finished files.
+%Read from finished log file.
 logfinished = [datapath, filesep, 'LAST'];
 if exist(logfinished, 'file')
     finished = load(logfinished);
-    startfile = finished(end) + 1;
+    if finished(2) == -1 %Task denoted by "-1" is completed.
+        startfile = finished(1) + 1;
+        startsubj = 1;
+    else %Task denoted by numbers other than "-1" is not completed.
+        startfile = finished(1);
+        startsubj = finished(2) + 1;
+    end
 else
     startfile = 1;
+    startsubj = 1;
 end
 %Determine whether to show multiwaitbar or not.
 switch computer
@@ -28,6 +35,7 @@ if useWaitBar
     multiWaitbar('Global Task', 0);
 end
 for ifile = startfile:totalfilenum
+    initialVarsF = who;
     %Refresh waitbar "Global Task".
     if useWaitBar
         rop = (ifile - 1) / totalfilenum;
@@ -45,6 +53,7 @@ for ifile = startfile:totalfilenum
     %onset will be discard to reduce influence from intentioanl eye movement.
     %In total, first 4 sec of the epoch will be discarded.
     taskname = regexp(thisFile, '(?<=EOG_)[A-Z]+', 'match', 'once');
+    dataname = [datapath, filesep, 'blink_res_', taskname];
     if strcmp(taskname, 'REST')
         starttime = 4;
     else 
@@ -54,7 +63,24 @@ for ifile = startfile:totalfilenum
     if useWaitBar
         multiWaitbar(['Processing Task: ', taskname], 0);
     end
-    for isub = 1:nsubj
+    if startsubj > 1
+        if exist(dataname, 'file')
+            load(dataname)
+            pid = blink_res.pid;
+            nblink = blink_res.nblink;
+            task_dur = blink_res.task_dur;
+            rate_blink = blink_res.rate_blink;
+            stat = blink_res.stat;
+        else
+            fprintf(logid, 'Data file %s not found, please have a check later.\n', dataname);
+        end
+    end
+    for isub = startsubj:nsubj
+        blink_res = table(pid, nblink, task_dur, rate_blink, stat);
+        save(dataname, 'blink_res');
+        %Set a file for recording finished files.
+        dlmwrite(logfinished, [ifile, isub - 1]); %Completed "isub - 1" subjects.
+        initialVarsS = who;
         %Refresh subtask waitbar.
         if useWaitBar
             ros = (isub - 1) / nsubj;
@@ -95,13 +121,16 @@ for ifile = startfile:totalfilenum
             end
             rate_blink(isub) = nblink(isub) / (task_dur(isub) / 60);
         end
+        clearvars('-except', initialVarsS{:})
     end
     blink_res = table(pid, nblink, task_dur, rate_blink, stat);
-    save([datapath, filesep, 'blink_res_', taskname], 'blink_res');
-    dlmwrite(logfinished, ifile, '-append');
+    save(dataname, 'blink_res');
+    %Set a file for recording finished files.
+    dlmwrite(logfinished, [ifile, -1]); %-1 denotes that all the subjects in current task have been analyzed.
     if useWaitBar
         multiWaitbar(['Processing Task: ', taskname], 'Close');
     end
+    clearvars('-except', initialVarsF{:})
 end
 if useWaitBar
     multiWaitbar('CloseAll');
