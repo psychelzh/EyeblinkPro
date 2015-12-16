@@ -1,7 +1,7 @@
 %Read data and calculate blink rate.
 clear, clc
 parpath = fileparts(pwd);
-datapath = [parpath, filesep, 'ResData'];
+datapath = [parpath, filesep, 'ResDataInv'];
 %Access to all files.
 dataFilesInfo = dir([datapath, filesep, 'EOG*']);
 dataFilesName = {dataFilesInfo.name};
