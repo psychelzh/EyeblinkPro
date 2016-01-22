@@ -1,26 +1,26 @@
 %Read data and calculate blink rate.
 clear, clc
 parpath = fileparts(pwd);
-datapath = [parpath, filesep, 'ResData'];
+datapath = [parpath, filesep, 'ResDataInv'];
 %Access to all files.
 dataFilesInfo = dir([datapath, filesep, 'EOG*']);
 dataFilesName = {dataFilesInfo.name};
 totalfilenum = length(dataFilesName);
 logid = fopen('readerror.log', 'w');
 %Read from finished log file.
-logfinished = [datapath, filesep, 'LAST'];
+logfinished = [datapath, filesep, 'LASTINVERSE'];
 if exist(logfinished, 'file')
     finished = load(logfinished);
     if finished(2) == -1 %Task denoted by "-1" is completed.
-        startfile = finished(1) + 1;
-        startsubj = 1;
+        startfile = finished(1) - 1;
+        startsubj = inf; %Start from the last subject.
     else %Task denoted by numbers other than "-1" is not completed.
         startfile = finished(1);
-        startsubj = finished(2) + 1;
+        startsubj = finished(2) - 1;
     end
 else
-    startfile = 1;
-    startsubj = 1;
+    startfile = totalfilenum;
+    startsubj = inf; %Start from the last subject.
 end
 %Determine whether to show multiwaitbar or not.
 switch computer
@@ -36,11 +36,11 @@ if useWaitBar
 end
 %For time estimation.
 tic
-for ifile = startfile:totalfilenum
+for ifile = startfile:-1:1
     initialVarsF = who;
     %For information of timing.
     elapsedtimeF = toc;
-    rop = (ifile - startfile) / (totalfilenum - startfile + 1);
+    rop = (startfile - ifile) / startfile;
     if rop == 0
         remTimeFile = nan;
     else
@@ -75,7 +75,7 @@ for ifile = startfile:totalfilenum
     end
     fprintf('Processing task: %s. Estimated remaining time: %s\n', taskname, etaF);
     if ifile == startfile
-        if startsubj > 1
+        if startsubj < inf
             if exist(dataname, 'file')
                 load(dataname)
                 pid = blink_res.pid;
@@ -88,17 +88,20 @@ for ifile = startfile:totalfilenum
             end
         end
     else
-        startsubj = 1;
+        startsubj = inf;
     end
-    for isub = startsubj:nsubj
+    if isinf(startsubj)
+        startsubj = nsubj; %Start from the last subject.
+    end
+    for isub = startsubj:-1:1
         blink_res = table(pid, nblink, task_dur, rate_blink, stat);
         save(dataname, 'blink_res');
         %Set a file for recording finished files.
-        dlmwrite(logfinished, [ifile, isub - 1]); %Completed "isub - 1" subjects.
+        dlmwrite(logfinished, [ifile, isub + 1]); %Completed "isub - 1" subjects.
         initialVarsS = who;
         %For information of timing.
         elapsedtimeS = toc;
-        ros = (isub - startsubj) / (nsubj - startsubj + 1);
+        ros = (startsubj - isub) / startsubj;
         if ros == 0
             remTimeTask = nan;
         else

@@ -21,10 +21,10 @@ for i = start:num - 1
     [~, gofp] = fit((i:num)', double(Dp'), 'poly1');
     sse(i) = gofn.sse + gofp.sse;
 end
-[ssemin, ind] = min(sse);
+[ssemin, ind] = findLocalMaxima(-sse);
 ssemax = max(sse(start:num - 1));
-val = vec(ind);
-stat.ind = ind;
+val = vec(ind(end));
+stat.ind = ind(end);
 stat.num = num;
-stat.gof = ssemin;
+stat.gof = -ssemin(end);
 stat.wgof = ssemax;

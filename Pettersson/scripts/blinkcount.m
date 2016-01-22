@@ -19,6 +19,10 @@ end
 
 %S1:Find out all the local maxima and scaled the maxima set to [0, 1].
 maxima = findLocalMaxima(EOG);
+%Remove the values that are too big from maxima. Basically, for long
+%episodes, these values might result from EMG, EKG, etc. And 1000 is kind
+%of an arbitrary value determined by visual inspection.
+maxima(maxima > 1000) = [];
 localmax = (sort(maxima) - min(maxima)) / (max(maxima) - min(maxima));
 %S2:Determine the threshold value of telling the noise and blink peak apart in the data. 
 [val, stat] = deAmpThreshVal(localmax, 2);
