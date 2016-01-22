@@ -76,11 +76,14 @@ outFields = {'EOGv', 'EOGh'};
 
 %Access to filenames.
 datapath = tasksetting.datapath;
-dataname = [tasksetting.dataprefix, '*.bdf'];
-filesInfo = dir([datapath, filesep, dataname]);
-filesName = {filesInfo.name};
-subid = str2double(regexp(filesName, '\d{4}', 'match', 'once'));
-totalfilenum = length(filesName);
+% dataname = [tasksetting.dataprefix, '*.bdf'];
+% filesInfo = dir([datapath, filesep, dataname]);
+AllFilesInfo = dir(datapath);
+AllFilesName = {AllFilesInfo.name};
+curtaskloc = ~cellfun(@isempty, regexp(AllFilesName, ['^', tasksetting.dataprefix, '\w*\d{4}\w*', tasksetting.datasuffix, '.bdf'], 'start', 'once'));
+curFilesName = AllFilesName(curtaskloc);
+subid = str2double(regexp(curFilesName, '\d{4}', 'match', 'once'));
+totalfilenum = length(curFilesName);
 fprintf('found %d files.\n', totalfilenum);
 %Give information of rate of progress.
 hwb = waitbar(0, '0', ...
@@ -105,7 +108,7 @@ for ifile = 1:totalfilenum
     try
         %Configuration for trial definition.
         cfg                     = [];
-        cfg.dataset             = [datapath, '\', filesName{ifile}];
+        cfg.dataset             = [datapath, '\', curFilesName{ifile}];
         cfg.channel             = trialpar.channel;
         cfg.trialdef.eventtype  = 'STATUS';
         cfg.trialdef.eventvalue = mod(trialpar.trigger, 16) * 16 + 15;
@@ -148,7 +151,7 @@ for ifile = 1:totalfilenum
         end
     catch
         fid = fopen('errlog.log', 'w');
-        fprintf(fid, 'Error found while reading file %s.\n', [datapath, '\', filesName{ifile}]);
+        fprintf(fid, 'Error found while reading file %s.\n', [datapath, '\', curFilesName{ifile}]);
         if exist('dataPrepro', 'var') 
             EOG(ifile).pid     = subid(ifile);
             EOG(ifile).fsample = dataPrepro.fsample;

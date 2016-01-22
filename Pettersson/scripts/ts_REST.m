@@ -4,13 +4,14 @@ clear tasksetting
 %Settings of the task REST.
 tasksetting.datapath              = 'E:\EEG_Gene_Data\EEG_Results'; %Specify where to read the data.
 tasksetting.dataprefix              = 'REST'; %Specify which data to read.
+tasksetting.datasuffix              = '';
 
 %For trial definition.
 tasksetting.trialpar.continuous   = 'no';
 tasksetting.trialpar.trigger      = 3; 
 tasksetting.trialpar.trialprepost = [-1, 60];
 tasksetting.trialpar.starttime    = 4;
-tasksetting.trialpar.channel      = {'EXG3' 'EXG4'};
+tasksetting.trialpar.channel      = {'EXG3' 'EXG4' 'EXG5' 'EXG6'};
 
 %Specify where to store data.
 cur_path = fileparts(mfilename('fullpath'));
