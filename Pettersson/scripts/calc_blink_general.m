@@ -6,7 +6,7 @@ datapath = [parpath, filesep, 'ResData'];
 dataFilesInfo = dir([datapath, filesep, 'EOG*']);
 dataFilesName = {dataFilesInfo.name};
 totalfilenum = length(dataFilesName);
-logid = fopen('readerror.log', 'w');
+logid = fopen('readerror.log', 'a');
 %Read from finished log file.
 logfinished = [datapath, filesep, 'LAST'];
 if exist(logfinished, 'file')
@@ -63,7 +63,7 @@ for ifile = startfile:totalfilenum
     %onset will be discard to reduce influence from intentioanl eye movement.
     %In total, first 4 sec of the epoch will be discarded.
     taskname = regexp(thisFile, '(?<=EOG_)[A-Z]+', 'match', 'once');
-    dataname = [datapath, filesep, 'blink_res_', taskname];
+    dataname = [datapath, filesep, 'blink_res_', taskname, '.mat'];
     if strcmp(taskname, 'REST')
         starttime = 4;
     else 
