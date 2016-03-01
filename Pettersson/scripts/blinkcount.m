@@ -26,17 +26,17 @@ maxima(maxima > 1000) = [];
 localmax = (sort(maxima) - min(maxima)) / (max(maxima) - min(maxima));
 %S2:Determine the threshold value of telling the noise and blink peak apart in the data. 
 [val, stat] = deAmpThreshVal(localmax, 2);
-%Here: OR value is used as a way of deciding whether the data can be used
-%in this method. By some exploration, I use 0.7 as the threshold.
-OR = 1 - stat.gof / stat.wgof;
-if OR < 0.7 %This amplitude needs calibration!!!!!
-    numBlk = nan;
-    stat.blinkpeak = [];
-    stat.LB = [];
-    stat.RB = [];
-    fprintf('Bad fitness. OR:%.2f\n', OR)
-    return
-end
+% %Here: OR value is used as a way of deciding whether the data can be used
+% %in this method. By some exploration, I use 0.7 as the threshold.
+% OR = 1 - stat.gof / stat.wgof;
+% if OR < 0.7 %This amplitude needs calibration!!!!!
+%     numBlk = nan;
+%     stat.blinkpeak = [];
+%     stat.LB = [];
+%     stat.RB = [];
+%     fprintf('Bad fitness. OR:%.2f\n', OR)
+%     return
+% end
 dp = val * (max(maxima) - min(maxima)) + min(maxima);
 %S3:Find out each peak and its duration.
 [loc, LB, RB] = dePeak(EOG, sr, dp, 400);
