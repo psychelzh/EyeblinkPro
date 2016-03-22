@@ -1,4 +1,4 @@
-function res_description = vischkblk(EOG, blink_res, start)
+function res = vischkblk(EOG, blink_res, start)
 %This script is a wrapper function to check the fitness of data 
 %subject by subject, which calls the following user-defined function:
 %   eyeblinkplot
@@ -43,6 +43,8 @@ if start ~= 1 %Report if not start from the first subject.
         res_description = nan(nsubj, length(reslabel));
         fprintf('No check result excel found, please have a check after this check.\n');
     end
+else
+    res_description = nan(nsubj, length(reslabel));
 end
 if size(res_description, 1) < nsubj
     res_description = [res_description; nan(nsubj - size(res_description, 1), length(reslabel))];
@@ -51,8 +53,9 @@ for isubj = start:nsubj
     fprintf('Now processing subject %d, remaining %d subjects.\n', isubj, nsubj - isubj);
     stat = blink_res.stat{isubj};
     EOGv = EOG(isubj).EOGv;
+    cfg.pid = EOG(isubj).pid;
     if ~isempty(stat)
-        eyeblinkplot(EOGv, stat);
+        eyeblinkplot(EOGv, stat, cfg);
         inputprompt    = {'How about it? Message:'};
         inputtitle     = 'Record';
         num_lines      = 1;
@@ -74,5 +77,8 @@ for isubj = start:nsubj
     end
 end
 res_description = array2table(res_description, 'VariableNames', reslabel);
+if nargout >= 1
+    res = res_description;
+end
 %Output the results into an Excel file.
 writetable(res_description, resdatafile);
