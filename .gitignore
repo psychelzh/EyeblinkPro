@@ -37,3 +37,6 @@ octave-workspace
 # data folders
 data
 EOG
+
+# logging files
+logs
