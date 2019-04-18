@@ -1,0 +1,107 @@
+[
+    {
+        "default": {
+            "datapath": "data",
+            "outpath": "EOG",
+            "dataprefix": "",
+            "datasuffix": "",
+            "outdataprefix": "",
+            "continuous": true,
+            "trigger": [],
+            "trialprepost": [],
+            "starttime": 0,
+            "channel": [
+                "EXG3",
+                "EXG4",
+                "EXG5",
+                "EXG6"
+            ],
+            "minevent": []
+        },
+        "FLT": {
+            "dataprefix": "F",
+            "outdataprefix": "EOG_FLT",
+            "trigger": [
+                1,
+                1
+            ],
+            "minevent": 360
+        },
+        "OB": {
+            "dataprefix": "OB",
+            "outdataprefix": "EOG_OB",
+            "continuous": false,
+            "trigger": [
+                1,
+                2
+            ],
+            "minevent": 908
+        },
+        "REST": {
+            "dataprefix": "REST",
+            "outdataprefix": "EOG_REST",
+            "trigger": 3,
+            "trialprepost": [
+                -1,
+                60
+            ],
+            "starttime": 4
+        },
+        "RLA": {
+            "dataprefix": "RLA",
+            "outdataprefix": "EOG_RLA",
+            "trigger": [
+                1,
+                2
+            ],
+            "minevent": 120
+        },
+        "RLAT": {
+            "dataprefix": "RLA",
+            "datasuffix": "T",
+            "outdataprefix": "EOG_RLAT",
+            "trigger": [
+                1,
+                2
+            ],
+            "minevent": 48
+        },
+        "RLB": {
+            "dataprefix": "RLB",
+            "outdataprefix": "EOG_RLB",
+            "trigger": [
+                1,
+                2
+            ],
+            "minevent": 120
+        },
+        "RLBT": {
+            "dataprefix": "RLB",
+            "datasuffix": "T",
+            "outdataprefix": "EOG_RLBT",
+            "trigger": [
+                1,
+                2
+            ],
+            "minevent": 48
+        },
+        "SM": {
+            "dataprefix": "SM",
+            "outdataprefix": "EOG_SM",
+            "trigger": [
+                1,
+                2
+            ],
+            "minevent": 156
+        },
+        "TEST": {
+            "dataprefix": "TEST",
+            "outdataprefix": "EOG_TEST",
+            "trigger": [
+                8,
+                9
+            ],
+            "minevent": 300
+        }
+    }
+]
