@@ -26,7 +26,6 @@
         },
         "OB": {
             "dataprefix": "OB",
-            "continuous": false,
             "trigger": [
                 1,
                 2
@@ -35,6 +34,7 @@
         },
         "REST": {
             "dataprefix": "REST",
+            "continuous": false,
             "trigger": 3,
             "trialprepost": [
                 -1,
