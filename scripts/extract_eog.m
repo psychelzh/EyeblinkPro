@@ -68,34 +68,30 @@ for i_file = 1:num_data_files
         end
         cfg                     = ft_definetrial(cfg);
         % store all the triggers of every sample point
-        events = cfg.event;
+        event = cfg.event;
+        trl = cfg.trl;
         %Configuration for filtering.
         cfg.bpfilter            = 'yes';
         cfg.bpfreq              = [0.5, 20];
         cfg.bpfilttype          = 'fir';
         data_prepro = ft_preprocessing(cfg);
-        %Configuration for resampling.
-        cfg                     = [];
-        cfg.resamplefs          = 256;
-        cfg.detrend             = 'no';
-        data_prepro             = ft_resampledata(cfg, data_prepro);
         %From the start time to the start point.
         startpoint = floor(data_prepro.fsample * tasksetting.starttime) + 1;
         %Calculate the vertical EOG data and/or horizontal EOG data.
         EOG(i_file).fsample = data_prepro.fsample;
-        EOG(i_file).events = events;
-        for i = 1:size(coi, 1)
-            EOGloc.(locFields{i}) = find(ismember(tasksetting.channel, coi(i, :)));
-            if ~isempty(EOGloc.(locFields{i}))
-                EOG(i_file).(outFields{i}).trial   = cell(size(data_prepro.trial));
-                EOG(i_file).(outFields{i}).time    = cell(size(data_prepro.trial));
-                for triali = 1:length(data_prepro.trial)
-                    EOG(i_file).(outFields{i}).trial{triali} = [...
-                        data_prepro.trial{triali}(EOGloc.(locFields{i})(1), startpoint:end); ...
-                        data_prepro.trial{triali}(EOGloc.(locFields{i})(2), startpoint:end); ...
-                        data_prepro.trial{triali}(EOGloc.(locFields{i})(1), startpoint:end) - ...
-                        data_prepro.trial{triali}(EOGloc.(locFields{i})(2), startpoint:end)];
-                    EOG(i_file).(outFields{i}).time{triali}  = data_prepro.time{triali}(startpoint:end);
+        EOG(i_file).startpoint = startpoint;
+        EOG(i_file).event = event;
+        EOG(i_file).trl = trl;
+        for i_type = 1:size(coi, 1)
+            EOGloc.(locFields{i_type}) = find(ismember(tasksetting.channel, coi(i_type, :)));
+            if ~isempty(EOGloc.(locFields{i_type}))
+                EOG(i_file).(outFields{i_type}).trial   = cell(size(data_prepro.trial));
+                for i_trial = 1:length(data_prepro.trial)
+                    EOG(i_file).(outFields{i_type}).trial{i_trial} = [...
+                        data_prepro.trial{i_trial}(EOGloc.(locFields{i_type})(1), startpoint:end); ...
+                        data_prepro.trial{i_trial}(EOGloc.(locFields{i_type})(2), startpoint:end); ...
+                        data_prepro.trial{i_trial}(EOGloc.(locFields{i_type})(1), startpoint:end) - ...
+                        data_prepro.trial{i_trial}(EOGloc.(locFields{i_type})(2), startpoint:end)];
                 end
             end
         end
@@ -104,17 +100,6 @@ for i_file = 1:num_data_files
         fprintf(fid, ...
             '[%s] Error: preprocessing file %s not succeeded!\n', ...
             datestr(now), fullfile(tasksetting.datapath, data_file_name));
-        if exist('data_prepro', 'var')
-            EOG(i_file).fsample = data_prepro.fsample;
-            EOG(i_file).events = events;
-            for i = 1:size(coi, 1)
-                EOGloc.(locFields{i}) = find(ismember(tasksetting.channel, coi(i, :)));
-                if ~isempty(EOGloc.(locFields{i}))
-                    EOG(i_file).(outFields{i}).trial   = {};
-                    EOG(i_file).(outFields{i}).time    = {};
-                end
-            end
-        end
         fclose(fid);
     end
     clearvars('-except', initialVars{:});
