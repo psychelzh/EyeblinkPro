@@ -1,4 +1,4 @@
-function outEOG = extract_eog(taskname)
+function EOG = extract_eog(taskname)
 %This function is used to do some prepocessing for all the EEG data stored
 %in .bdf (Biosemi) files using FieldTrip. EOG data is extracted and stored
 %in the generated file EOG.mat as variable EOGv, which is a structure
@@ -39,7 +39,10 @@ coi       = {...
 locFields = {'vloc', 'hloc'};
 outFields = {'EOGv', 'EOGh'};
 
-%Access to filenames.
+% preallocate results as an empty structure
+EOG = struct;
+
+% iterate file by file
 data_files = dir(fullfile(tasksetting.datapath, ...
     sprintf('%s*%s.bdf', tasksetting.dataprefix, tasksetting.datasuffix)));
 num_data_files = length(data_files);
@@ -115,17 +118,4 @@ for i_file = 1:num_data_files
         fclose(fid);
     end
     clearvars('-except', initialVars{:});
-end
-%Save data.
-if exist('EOG', 'var')
-    save_data_path = tasksetting.outpath;
-    save_data_name = [tasksetting.outdataprefix, '_', datestr(now, 'mm-dd-HH-MM')];
-    if ~exist(save_data_path, 'dir')
-        mkdir(save_data_path);
-    end
-    save(fullfile(save_data_path, save_data_name), 'EOG');
-    fprintf('Save done!\nEOG data saved to folder %s as %s.mat.\n', save_data_path, save_data_name);
-    if nargout > 0, outEOG = EOG; end
-else
-    if nargout > 0, outEOG = struct; end
 end
