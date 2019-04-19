@@ -73,22 +73,22 @@ for i_file = 1:num_data_files
         cfg.bpfilttype          = 'fir';
         data_prepro = ft_preprocessing(cfg);
         % add time and trial info to event 
-        event = data_prepro.cfg.event;
         trl = data_prepro.cfg.trl;
-        for i_event = 1:length(event)
-            if event(i_event).sample >= trl(1, 1) && event(i_event).sample <= trl(1, 2)
-                event(i_event).trl = 1;
-                event(i_event).time = data_prepro.time{1}(event(i_event).sample - trl(1, 1) + 1);
-            elseif event(i_event).sample >= trl(2, 1) && event(i_event).sample <= trl(2, 2)
-                event(i_event).trl = 2;
-                event(i_event).time = data_prepro.time{2}(event(i_event).sample - trl(2, 1) + 1);
-            elseif event(i_event).sample >= trl(3, 1) && event(i_event).sample <= trl(3, 2)
-                event(i_event).trl = 3;
-                event(i_event).time = data_prepro.time{3}(event(i_event).sample - trl(3, 1) + 1);
-            else
-                event(i_event).trl = nan;
-                event(i_event).time = nan;
-            end
+        trl_real = trl(:, 1:2) - trl(:, 3);
+        event = data_prepro.cfg.event;
+        event(cellfun(@isempty, {event.value})) = [];
+        event = struct2table(event);
+        event.offset = [];
+        event.duration = [];
+        event.trl = nan(height(event), 1);
+        event.time = nan(height(event), 1);
+        for i_trl = 1:size(trl_real, 1)
+            rows_this_trl = event.sample >= trl_real(i_trl, 1) & ...
+                event.sample <= trl_real(i_trl, 2);
+            event.trl(rows_this_trl) = i_trl;
+            event.time(rows_this_trl) = ...
+                data_prepro.time{i_trl}(event.sample(rows_this_trl) - ...
+                trl_real(i_trl, 1) + 1);
         end
         % resample dataset to reduce dataset size
         cfg                     = [];
