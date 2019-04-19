@@ -36,7 +36,7 @@
             "continuous": false,
             "trigger": 3,
             "trialprepost": [
-                -1,
+                0,
                 60
             ]
         },
