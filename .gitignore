@@ -35,7 +35,7 @@ octave-workspace
 # End of https://www.gitignore.io/api/matlab
 
 # data folders
-data
+EEG_Results
 EOG
 
 # logging files

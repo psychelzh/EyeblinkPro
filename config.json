@@ -1,7 +1,7 @@
 [
     {
         "default": {
-            "datapath": "data",
+            "datapath": "EEG_Results",
             "dataprefix": "",
             "datasuffix": "",
             "continuous": true,
