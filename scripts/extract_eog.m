@@ -89,6 +89,7 @@ for i_file = 1:num_data_files
                         data_prepro.trial{i_trial}(EOGloc.(locFields{i_type})(2), :); ...
                         data_prepro.trial{i_trial}(EOGloc.(locFields{i_type})(1), :) - ...
                         data_prepro.trial{i_trial}(EOGloc.(locFields{i_type})(2), :)];
+                    EOG(i_file).(outFields{i_type}).time{i_trial}  = data_prepro.time{i_trial};
                 end
             end
         end
