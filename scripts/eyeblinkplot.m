@@ -13,24 +13,20 @@ function eyeblinkplot(EOGv, stat, cfg)
 %Checking input argument.
 if nargin <= 2
     cfg.pid = nan;
-    cfg.starttime = 4;
     cfg.sr = 256;
 end
 if ~isfield(cfg, 'pid'), cfg.pid = nan; end
-if ~isfield(cfg, 'starttime'), cfg.starttime = 4; end
 if ~isfield(cfg, 'sr'), cfg.sr = 256; end
 if nargin <= 1
     error('UDF:EYEBLINKPLOT:NotEnoughInput', 'At least two input arguments are needed.');
 end
 
-%Initializing processing.
-startpoint = floor(cfg.sr * cfg.starttime) + 1;
 %Plotting.
 ntrial = length(EOGv.trial);
 for itrial = 1:ntrial
     figure
     hold on
-    EOG = EOGv.trial{itrial}(3, startpoint:end);
+    EOG = EOGv.trial{itrial}(3, :);
     plot((1:length(EOG)) / cfg.sr, EOG)
     for i = 1:length(stat(itrial).blinkpeak)
         plot((stat(itrial).LB(i):stat(itrial).RB(i)) / cfg.sr, EOG(stat(itrial).LB(i):stat(itrial).RB(i)), 'g')
