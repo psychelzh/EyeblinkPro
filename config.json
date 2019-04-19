@@ -7,7 +7,6 @@
             "continuous": true,
             "trigger": [],
             "trialprepost": [],
-            "starttime": 0,
             "channel": [
                 "EXG3",
                 "EXG4",
@@ -39,8 +38,7 @@
             "trialprepost": [
                 -1,
                 60
-            ],
-            "starttime": 4
+            ]
         },
         "RLA": {
             "dataprefix": "RLA",

@@ -75,23 +75,20 @@ for i_file = 1:num_data_files
         cfg.bpfreq              = [0.5, 20];
         cfg.bpfilttype          = 'fir';
         data_prepro = ft_preprocessing(cfg);
-        %From the start time to the start point.
-        startpoint = floor(data_prepro.fsample * tasksetting.starttime) + 1;
         %Calculate the vertical EOG data and/or horizontal EOG data.
         EOG(i_file).fsample = data_prepro.fsample;
-        EOG(i_file).startpoint = startpoint;
         EOG(i_file).event = event;
         EOG(i_file).trl = trl;
         for i_type = 1:size(coi, 1)
             EOGloc.(locFields{i_type}) = find(ismember(tasksetting.channel, coi(i_type, :)));
             if ~isempty(EOGloc.(locFields{i_type}))
-                EOG(i_file).(outFields{i_type}).trial   = cell(size(data_prepro.trial));
+                EOG(i_file).(outFields{i_type}).trial = cell(size(data_prepro.trial));
                 for i_trial = 1:length(data_prepro.trial)
                     EOG(i_file).(outFields{i_type}).trial{i_trial} = [...
-                        data_prepro.trial{i_trial}(EOGloc.(locFields{i_type})(1), startpoint:end); ...
-                        data_prepro.trial{i_trial}(EOGloc.(locFields{i_type})(2), startpoint:end); ...
-                        data_prepro.trial{i_trial}(EOGloc.(locFields{i_type})(1), startpoint:end) - ...
-                        data_prepro.trial{i_trial}(EOGloc.(locFields{i_type})(2), startpoint:end)];
+                        data_prepro.trial{i_trial}(EOGloc.(locFields{i_type})(1), :); ...
+                        data_prepro.trial{i_trial}(EOGloc.(locFields{i_type})(2), :); ...
+                        data_prepro.trial{i_trial}(EOGloc.(locFields{i_type})(1), :) - ...
+                        data_prepro.trial{i_trial}(EOGloc.(locFields{i_type})(2), :)];
                 end
             end
         end
