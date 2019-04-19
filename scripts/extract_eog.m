@@ -53,7 +53,7 @@ for i_file = 1:num_data_files
     EOG(i_file).pid = str2double(regexp(data_file_name, '\d+', 'match', 'once')); %#ok<*AGROW>
     initialVars = who;
     try
-        %Configuration for trial definition.
+        % define trials of EEG data
         cfg                     = [];
         cfg.dataset             = fullfile(tasksetting.datapath, data_file_name);
         cfg.channel             = tasksetting.channel;
@@ -67,18 +67,38 @@ for i_file = 1:num_data_files
             cfg.trialdef.poststim    = tasksetting.trialprepost(2);
         end
         cfg                     = ft_definetrial(cfg);
-        % store all the triggers of every sample point
-        event = cfg.event;
-        trl = cfg.trl;
-        %Configuration for filtering.
+        % use band pass filtering to remove artifacts
         cfg.bpfilter            = 'yes';
         cfg.bpfreq              = [0.5, 20];
         cfg.bpfilttype          = 'fir';
         data_prepro = ft_preprocessing(cfg);
-        %Calculate the vertical EOG data and/or horizontal EOG data.
+        % add time and trial info to event 
+        event = data_prepro.cfg.event;
+        trl = data_prepro.cfg.trl;
+        for i_event = 1:length(event)
+            if event(i_event).sample >= trl(1, 1) && event(i_event).sample <= trl(1, 2)
+                event(i_event).trl = 1;
+                event(i_event).time = data_prepro.time{1}(event(i_event).sample - trl(1, 1) + 1);
+            elseif event(i_event).sample >= trl(2, 1) && event(i_event).sample <= trl(2, 2)
+                event(i_event).trl = 2;
+                event(i_event).time = data_prepro.time{2}(event(i_event).sample - trl(2, 1) + 1);
+            elseif event(i_event).sample >= trl(3, 1) && event(i_event).sample <= trl(3, 2)
+                event(i_event).trl = 3;
+                event(i_event).time = data_prepro.time{3}(event(i_event).sample - trl(3, 1) + 1);
+            else
+                event(i_event).trl = nan;
+                event(i_event).time = nan;
+            end
+        end
+        % resample dataset to reduce dataset size
+        cfg                     = [];
+        cfg.resamplefs          = 256;
+        cfg.detrend             = 'no';
+        data_prepro             = ft_resampledata(cfg, data_prepro);
+        % store sample rate and event (with time and trial info)
         EOG(i_file).fsample = data_prepro.fsample;
         EOG(i_file).event = event;
-        EOG(i_file).trl = trl;
+        %Calculate the vertical EOG data and/or horizontal EOG data.
         for i_type = 1:size(coi, 1)
             EOGloc.(locFields{i_type}) = find(ismember(tasksetting.channel, coi(i_type, :)));
             if ~isempty(EOGloc.(locFields{i_type}))
