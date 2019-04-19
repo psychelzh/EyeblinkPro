@@ -44,7 +44,12 @@ EOG = struct;
 
 % iterate file by file
 data_files = dir(fullfile(tasksetting.datapath, ...
-    sprintf('%s*%s.bdf', tasksetting.dataprefix, tasksetting.datasuffix)));
+    sprintf('%s*.bdf', tasksetting.dataprefix)));
+% make sure the 'datasuffix' is correct
+data_files = data_files(...
+    ~cellfun(@isempty, regexp({data_files.name}, ...
+    sprintf('\\d+%s\\.', tasksetting.datasuffix), ...
+    'start', 'once')));
 num_data_files = length(data_files);
 fprintf('found %d files.\n', num_data_files);
 for i_file = 1:num_data_files
@@ -72,7 +77,7 @@ for i_file = 1:num_data_files
         cfg.bpfreq              = [0.5, 20];
         cfg.bpfilttype          = 'fir';
         data_prepro = ft_preprocessing(cfg);
-        % add time and trial info to event 
+        % add time and trial info to event
         trl = data_prepro.cfg.trl;
         trl_real = trl(:, 1:2) - trl(:, 3);
         event = data_prepro.cfg.event;
