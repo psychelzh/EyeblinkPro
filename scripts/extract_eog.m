@@ -1,26 +1,28 @@
 function EOG = extract_eog(taskname)
 %This function is used to do some prepocessing for all the EEG data stored
 %in .bdf (Biosemi) files using FieldTrip. EOG data is extracted and stored
-%in the generated file EOG.mat as variable EOGv, which is a structure
-%stored 4 pieces of information in its 4 fields:
+%in the generated file as variable EOG, which is a structure with five
+%fields:
 %   1. Subject ID;
 %   2. Sampling rate; (When prepocessing, resampling is done, so this is
 %   not the original sampling rate.)
-%   3. Epochs of EEG data (EOG only);
-%   4. Time information of each epoch.
+%   3. Event: all the events in each trial
+%   4. EOGv: vertical EOG (containing time info)
+%   5. EOGh: horizontal EOG (containing time info)
 %
 %See also FT_DEFINETRIAL, FT_TRIALFUN_GENERAL, FT_PREPROCESSING
 
-%Get the setting of each task.
+% get the configurations of this task
 tasksetting = get_config(taskname);
 
-%Check input trialpar.
+% check configuration of `trigger`, which is required
 if isempty(tasksetting.trigger)
-    error('UDF:PREPRO:NO_TRIGGER_SPECIFIED', ...
+    error('EBR:EXTRACT_EOG:NO_TRIGGER_SPECIFIED', ...
         'Input trial definition must have at least one specific trigger value.');
 end
 
-%Check configuration.
+% when `continuous` is true there needs two triggers;
+% otherwise, `trialprepost` should be specified
 if tasksetting.continuous
     if length(tasksetting.trigger) ~= 2
         error('Continuous data will be read, and the number of triggers of the trial begin and end are not right.');
