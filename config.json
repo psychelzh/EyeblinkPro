@@ -13,7 +13,8 @@
                 "EXG5",
                 "EXG6"
             ],
-            "minevent": []
+            "minevent": [],
+            "starttime": 0
         },
         "FLT": {
             "dataprefix": "F",
@@ -38,7 +39,8 @@
             "trialprepost": [
                 0,
                 60
-            ]
+            ],
+            "starttime": 4
         },
         "RLA": {
             "dataprefix": "RLA",

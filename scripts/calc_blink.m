@@ -2,6 +2,7 @@
 function blink_res = calc_blink(taskname)
 % This script is used to determine eye blink pattern in EOG dataset
 % Please run Extract_EOG before using this.
+tasksetting = get_config(taskname);
 data_path = 'EOG';
 h_log_err = fopen(fullfile('logs', 'readerror.log'), 'a');
 load(fullfile(data_path, sprintf('EOG_%s.mat', taskname))); %#ok<LOAD>
@@ -24,13 +25,14 @@ for isub = 1:nsubj
     else
         nblink(isub)   = 0;
         task_dur(isub) = 0;
+        start_point = floor(tasksetting.starttime * EOG(isub).fsample) + 1;
         for itrial = 1:ntrial
             if ~isempty(EOG(isub).EOGv.trial{itrial})
                 try
-                    [numBlk, blinkstat] = blinkcount(EOG(isub).EOGv.trial{itrial}(3, :), EOG(isub).fsample);
+                    [numBlk, blinkstat] = blinkcount(EOG(isub).EOGv.trial{itrial}(3, start_point:end), EOG(isub).fsample);
                     if ~isnan(numBlk)
                         nblink(isub) = nblink(isub) + numBlk;
-                        task_dur(isub) = task_dur(isub) + EOG(isub).EOGv.time{itrial}(end) - EOG(isub).EOGv.time{itrial}(1);
+                        task_dur(isub) = task_dur(isub) + EOG(isub).EOGv.time{itrial}(end) - EOG(isub).EOGv.time{itrial}(start_point);
                         stat{isub}(itrial) = blinkstat;
                     else
                         stat{isub}(itrial) = blinkstat;
