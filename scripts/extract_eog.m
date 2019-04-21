@@ -21,16 +21,9 @@ if isempty(tasksetting.trigger)
         'Input trial definition must have at least one specific trigger value.');
 end
 
-% when `continuous` is true there needs two triggers;
-% otherwise, `trialprepost` should be specified
-if tasksetting.continuous
-    if length(tasksetting.trigger) ~= 2
-        error('Continuous data will be read, and the number of triggers of the trial begin and end are not right.');
-    end
-else
-    if isempty(tasksetting.trialprepost)
-        error('Epochs are to be extracted, but there is no settings for trial duration.')
-    end
+% there needs two triggers specified
+if length(tasksetting.trigger) ~= 2
+    error('Continuous data will be read, and the number of triggers of the trial begin and end are not right.');
 end
 
 %Possible channel of interest and output fields.
@@ -66,13 +59,8 @@ for i_file = 1:num_data_files
         cfg.channel             = tasksetting.channel;
         cfg.trialdef.eventtype  = 'STATUS';
         cfg.trialdef.eventvalue = mod(tasksetting.trigger, 16) * 16 + 15;
-        if tasksetting.continuous
-            cfg.trialfun             = 'btcontinuous'; %Use a user defined trial function, see help BTCONTINUOUS.
-            cfg.trialdef.minevent    = tasksetting.minevent;
-        else
-            cfg.trialdef.prestim     = tasksetting.trialprepost(1);
-            cfg.trialdef.poststim    = tasksetting.trialprepost(2);
-        end
+        cfg.trialfun             = 'btcontinuous'; %Use a user defined trial function, see help BTCONTINUOUS.
+        cfg.trialdef.minevent    = tasksetting.minevent;
         cfg                     = ft_definetrial(cfg);
         % use band pass filtering to remove artifacts
         cfg.bpfilter            = 'yes';

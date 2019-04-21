@@ -4,7 +4,6 @@
             "datapath": "EEG_Results",
             "dataprefix": "",
             "datasuffix": "",
-            "continuous": true,
             "trigger": [],
             "trialprepost": [],
             "channel": [
@@ -13,7 +12,7 @@
                 "EXG5",
                 "EXG6"
             ],
-            "minevent": [],
+            "minevent": 0,
             "starttime": 0
         },
         "FLT": {
@@ -34,11 +33,9 @@
         },
         "REST": {
             "dataprefix": "REST",
-            "continuous": false,
-            "trigger": 3,
-            "trialprepost": [
-                0,
-                60
+            "trigger": [
+                3,
+                2
             ],
             "starttime": 4
         },
