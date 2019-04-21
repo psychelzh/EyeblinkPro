@@ -18,8 +18,6 @@ addpath scripts
 log_dir = 'logs';
 check_result_log = fullfile(log_dir, sprintf('check_results_%s.txt', taskname));
 completion_log = fullfile(log_dir, sprintf('completion_%s', taskname));
-% resdatafile = [datapath, filesep, 'checkResult.xlsx'];
-% completedfile = [datapath, filesep, 'completed'];
 
 % set start if not specified
 if nargin < 2
@@ -81,11 +79,14 @@ for i_subj = start:num_subj
     else
         fprintf('User canceled at subject of %d.\n%d subjects are checked in total for this turn.\n', ...
             i_subj, i_subj - start);
-        break;
+        break
     end
 end
 %Output the results into an Excel file.
 writetable(check_result, check_result_log);
-dlmwrite(completion_log, 0);
+% store 0 to completion log when all are done
+if i_subj == num_subj
+    dlmwrite(completion_log, 0);
+end
 % utilies functions are under this directory
 rmpath scripts
