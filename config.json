@@ -12,8 +12,7 @@
                 "EXG5",
                 "EXG6"
             ],
-            "minevent": 0,
-            "starttime": 0
+            "minevent": 0
         },
         "FLT": {
             "dataprefix": "F",
@@ -36,8 +35,7 @@
             "trigger": [
                 3,
                 2
-            ],
-            "starttime": 4
+            ]
         },
         "RLA": {
             "dataprefix": "RLA",
