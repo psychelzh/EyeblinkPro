@@ -83,7 +83,7 @@ for i_subj = start:num_subj
     end
 end
 %Output the results into an Excel file.
-writetable(check_result, check_result_log);
+writetable(check_result, check_result_log, 'Delimiter', '\t');
 % store 0 to completion log when all are done
 if i_subj == num_subj
     dlmwrite(completion_log, 0);
