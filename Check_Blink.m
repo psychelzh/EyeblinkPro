@@ -14,6 +14,9 @@ function Check_Blink(taskname, start)
 % utilies functions are under this directory
 addpath scripts
 
+% get the task setting for this task
+tasksetting = get_config(taskname);
+
 % initialize logging file
 log_dir = 'logs';
 check_result_log = fullfile(log_dir, sprintf('check_results_%s.txt', taskname));
@@ -61,9 +64,9 @@ for i_subj = start:num_subj
     fprintf('Now processing subject %d, remaining %d subjects.\n', i_subj, num_subj - i_subj);
     stat = blink_res.stat{i_subj};
     EOGv = EOG(i_subj).EOGv;
-    cfg.pid = EOG(i_subj).pid;
+    tasksetting.pid = EOG(i_subj).pid;
     if ~isempty(stat)
-        eyeblinkplot(EOGv, stat, cfg);
+        eyeblinkplot(EOGv, stat, tasksetting);
         inputprompt    = {'How about it? Message (-1=needs further examin, 0=no fitness, 1=okay):'};
         inputtitle     = 'Record';
         num_lines      = 1;
