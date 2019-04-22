@@ -12,7 +12,8 @@
                 "EXG5",
                 "EXG6"
             ],
-            "minevent": 0
+            "minevent": 0,
+            "resamplefs": 256
         },
         "FLT": {
             "dataprefix": "F",

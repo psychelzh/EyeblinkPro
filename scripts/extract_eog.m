@@ -87,7 +87,7 @@ for i_file = 1:num_data_files
         end
         % resample dataset to reduce dataset size
         cfg                     = [];
-        cfg.resamplefs          = 256;
+        cfg.resamplefs          = tasksetting.resamplefs;
         cfg.detrend             = 'no';
         data_prepro             = ft_resampledata(cfg, data_prepro);
         % store sample rate and event (with time and trial info)
