@@ -25,6 +25,7 @@ if nargin < 2
         start = load(completion_log);
         if start == 0
             fprintf('Log file ''%s'' indicates the checking has completed. Exiting.\n', completion_log)
+            rmpath scripts
             return
         end
     else
