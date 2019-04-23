@@ -1,4 +1,4 @@
-function Check_Blink(taskname, start)
+function Check_Blink(taskname, varargin)
 %CHECK_BLINK Checks the fitness of data subject by subject
 %
 %The output res_description contains a variable 'Message', which codes the
@@ -15,6 +15,32 @@ function Check_Blink(taskname, start)
 % utilies functions are under this directory
 addpath scripts
 
+% parse input
+p = inputParser;
+p.addRequired('TaskName', ...
+    @(x) validateattributes(x, {'char'}, {'scalartext', 'nonempty'}));
+p.addParameter('Recheck', false, ...
+    @(x) (all(ismember(x, -2:1)) && ~islogical(x)) || (isscalar(x) && islogical(x)));
+p.addParameter('SubjectList', [], ...
+    @(x) validateattributes(x, {'numeric'}, {'positive', 'integer'}));
+p.addParameter('Start', [], ...
+    @(x) validateattributes(x, {'numeric'}, {'scalar', 'positive', 'integer'}));
+parse(p, taskname, varargin{:});
+taskname = p.Results.TaskName;
+recheck = p.Results.Recheck;
+sub_list = p.Results.SubjectList;
+start = p.Results.Start;
+
+% judge recheck status
+if islogical(recheck)
+    is_recheck = recheck;
+    if recheck == true
+        recheck = -2:1;
+    end
+else
+    is_recheck = true;
+end
+
 % get the task setting for this task
 tasksetting = get_config(taskname);
 
@@ -23,12 +49,57 @@ log_dir = 'logs';
 check_result_log = fullfile(log_dir, sprintf('check_results_%s.txt', taskname));
 completion_log = fullfile(log_dir, sprintf('completion_%s', taskname));
 
-% set start if not specified
-if nargin < 2
-    if exist(completion_log, 'file')
+% throw an error when to do recheck before first check is finished
+if is_recheck
+    if ~exist(check_result_log, 'file')
+        error('EBR:Check_Blink:NoCheckResultsFound', ...
+            'When rechecking, we need the original check results in file ''%s''.', ...
+            check_result_log)
+    end
+    completion_first_check = load(completion_log);
+    if completion_first_check ~= 0
+        error('EBR:Check_Blink:FirstCheckNotFinished', ...
+            'When rechecking, the first check should have been finished.')
+    end
+end
+
+% load data and merge them
+load(fullfile('EOG', sprintf('EOG_%s', taskname))) %#ok<*LOAD>
+load(fullfile('EOG', sprintf('blink_res_%s', taskname)))
+EOG_blink = outerjoin(struct2table(EOG), blink_res, ...
+    'Keys', 'pid', 'MergeKeys', true, ...
+    'LeftVariables', {'pid', 'fsample', 'event', 'EOGv'}, ...
+    'RightVariables', {'pid', 'stat'});
+
+% set subject list based on recheck setting if not specified
+store_rate = true; % used to indicate whether to store the finish rate
+if is_recheck
+    store_rate = false; 
+    fprintf('Begin rechecking.\n')
+    fprintf('Reading first check results from ''%s''.\n', check_result_log);
+    check_result = readtable(check_result_log);
+    if ismember('Recheck', check_result.Properties.VariableNames)
+        error('EBR:Check_Blink:DupRecheck', ...
+            'Seemingly one recheck has been done. Please delete those logs before rechecking.')
+    end
+    check_result.Recheck = check_result.Message;
+    rows_to_check = ismember(check_result.Message, recheck);
+else
+    rows_to_check = true(height(EOG_blink), 1);
+end
+if ~isempty(sub_list)
+    store_rate = false; 
+    rows_to_check = rows_to_check & ismember(EOG_blink.pid, sub_list);
+end
+rows_to_check = find(rows_to_check);
+
+% if not in recheck, start could be recovered from file
+if isempty(start)
+    if exist(completion_log, 'file') && ~is_recheck
         start = load(completion_log);
         if start == 0
-            fprintf('Log file ''%s'' indicates the checking has completed. Exiting.\n', completion_log)
+            fprintf('Log file ''%s'' indicates the checking has completed. Exiting.\n', ...
+                completion_log)
             rmpath scripts
             return
         end
@@ -37,17 +108,16 @@ if nargin < 2
     end
 end
 
-% load data
-load(fullfile('EOG', sprintf('EOG_%s', taskname))) %#ok<*LOAD>
-load(fullfile('EOG', sprintf('blink_res_%s', taskname)))
-num_subj = length(EOG);
-fprintf('%d subjects found in total.\n', num_subj);
-if start ~= 1 %Report if not start from the first subject.
-    fprintf('Try starting from subject %d.\n', start);
-    if exist(check_result_log, 'file')
-        fprintf('Reading existing data from ''%s''.\n', check_result_log);
+% begin checking
+num_subj = length(rows_to_check);
+fprintf('Will check %d subjects in total.\n', num_subj);
+% when not in recheck, will try to continue from last checking
+if ~is_recheck
+    if start ~= 1 && exist(check_result_log, 'file')
+        fprintf('Try starting from subject %d.\n', start);
+        fprintf('Reading existing check results from ''%s''.\n', check_result_log);
         check_result = readtable(check_result_log);
-        if ~isequal(check_result.pid, [EOG.pid]')
+        if ~isequal(check_result.pid, EOG_blink.pid)
             warning('EBR:CHECK_BLINK:UnconsistentCheckResult', ...
                 'The subject identities in the check result are not consistent with those in `EOG`.')
             fprintf('Force to start from subject 1.\n')
@@ -57,40 +127,55 @@ if start ~= 1 %Report if not start from the first subject.
         fprintf('No check result excel found, will force to start from subject 1, then.\n');
         start = 1;
     end
+    if start == 1
+        check_result = table(EOG_blink.pid, nan(height(EOG_blink), 1), ...
+            'VariableNames', {'pid', 'Message'});
+    end
 end
-if start == 1
-    check_result = table([EOG.pid]', nan(num_subj, 1), 'VariableNames', {'pid', 'Message'});
-end
+
 for i_subj = start:num_subj
     fprintf('Now processing subject %d, remaining %d subjects.\n', i_subj, num_subj - i_subj);
-    stat = blink_res.stat{i_subj};
-    EOGv = EOG(i_subj).EOGv;
-    tasksetting.pid = EOG(i_subj).pid;
-    if ~isempty(stat)
-        eyeblinkplot(EOGv, stat, tasksetting);
-        inputprompt    = {'How about it? Message (-2=needs further examin, -1=up and down are inverted, 0=no fitness, 1=okay):'};
-        inputtitle     = 'Record';
-        num_lines      = 1;
-        defans         = {'1'};
-        options.Resize = 'off';
-        userinput      = inputdlg(inputprompt, inputtitle, num_lines, defans, options);
-    else
+    row_to_check = rows_to_check(i_subj);
+    stat = EOG_blink.stat{row_to_check};
+    if isempty(stat)
         fprintf('No data for this subject. Continue to the next.\n');
-        userinput      = {'0'};
+        switch is_recheck
+            case true
+                check_result.Recheck(row_to_check) = 0;
+            case false
+                check_result.Message(row_to_check) = 0;
+        end
+        continue
     end
-    dlmwrite(completion_log, i_subj);
+    EOGv = EOG_blink.EOGv{row_to_check};
+    tasksetting.pid = EOG_blink.pid(row_to_check);
+    eyeblinkplot(EOGv, stat, tasksetting);
+    inputprompt    = {'How about it? Message (-2=needs further examin, -1=up and down are inverted, 0=no fitness, 1=okay):'};
+    inputtitle     = 'Record';
+    num_lines      = 1;
+    defans         = {'1'};
+    options.Resize = 'off';
+    userinput      = inputdlg(inputprompt, inputtitle, num_lines, defans, options);
     if ~isempty(userinput)
-        check_result.Message(i_subj) = str2double(userinput);
+        switch is_recheck
+            case true
+                check_result.Recheck(row_to_check) = str2double(userinput);
+            case false
+                check_result.Message(row_to_check) = str2double(userinput);
+        end
     else
         fprintf('User canceled at subject of %d.\n%d subjects are checked in total for this turn.\n', ...
             i_subj, i_subj - start);
         break
     end
+    if store_rate
+        dlmwrite(completion_log, i_subj);
+    end
 end
 %Output the results into an Excel file.
 writetable(check_result, check_result_log, 'Delimiter', '\t');
 % store 0 to completion log when all are done
-if i_subj == num_subj && ~isempty(userinput)
+if store_rate && i_subj == num_subj && ~isempty(userinput)
     dlmwrite(completion_log, 0);
 end
 % utilies functions are under this directory
