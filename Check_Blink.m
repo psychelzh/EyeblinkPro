@@ -89,7 +89,7 @@ end
 %Output the results into an Excel file.
 writetable(check_result, check_result_log, 'Delimiter', '\t');
 % store 0 to completion log when all are done
-if i_subj == num_subj
+if i_subj == num_subj && ~isempty(userinput)
     dlmwrite(completion_log, 0);
 end
 % utilies functions are under this directory
