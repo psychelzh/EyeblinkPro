@@ -12,7 +12,9 @@
                 "EXG6"
             ],
             "minevent": 0,
-            "resamplefs": 256
+            "resamplefs": 256,
+            "triggermap": [],
+            "trialdur": []
         },
         "FLT": {
             "dataprefix": "F",
@@ -20,7 +22,25 @@
                 1,
                 1
             ],
-            "minevent": 360
+            "minevent": 360,
+            "triggermap": {
+                "start_end": 1,
+                "stim_left_0": 3,
+                "stim_left_2": 4,
+                "stim_left_3": 5,
+                "stim_left_4": 6,
+                "stim_left_5": 7,
+                "stim_left_6": 8,
+                "stim_right_0": 9,
+                "stim_right_2": 10,
+                "stim_right_3": 11,
+                "stim_right_4": 12,
+                "stim_right_5": 13,
+                "stim_right_6": 14,
+                "probe": 15,
+                "resp": 2
+            },
+            "trialdur": 2
         },
         "OB": {
             "dataprefix": "OB",
@@ -35,7 +55,13 @@
             "trigger": [
                 3,
                 2
-            ]
+            ],
+            "triggermap": {
+                "start": 1,
+                "close": 2,
+                "open": 3,
+                "end": 4
+            }
         },
         "RLA": {
             "dataprefix": "RLA",
@@ -43,7 +69,17 @@
                 1,
                 2
             ],
-            "minevent": 120
+            "minevent": 120,
+            "triggermap": {
+                "start": 1,
+                "end": 2,
+                "stim_onset": 6,
+                "resp_win": 7,
+                "resp_lose": 8,
+                "resp_null": 5,
+                "feedback_win": 3,
+                "feedback_lose": 4
+            }
         },
         "RLAT": {
             "dataprefix": "RLA",
@@ -52,7 +88,16 @@
                 1,
                 2
             ],
-            "minevent": 48
+            "minevent": 48,
+            "triggermap": {
+                "start": 81,
+                "end": 82,
+                "stim_approach": 83,
+                "stim_avoidence": 84,
+                "resp_right": 85,
+                "resp_wrong": 86,
+                "resp_null": 87
+            }
         },
         "RLB": {
             "dataprefix": "RLB",
@@ -60,7 +105,17 @@
                 1,
                 2
             ],
-            "minevent": 120
+            "minevent": 120,
+            "triggermap": {
+                "start": 1,
+                "end": 2,
+                "stim_onset": 6,
+                "resp_win": 7,
+                "resp_lose": 8,
+                "resp_null": 5,
+                "feedback_win": 3,
+                "feedback_lose": 4
+            }
         },
         "RLBT": {
             "dataprefix": "RLB",
@@ -69,7 +124,16 @@
                 1,
                 2
             ],
-            "minevent": 48
+            "minevent": 48,
+            "triggermap": {
+                "start": 81,
+                "end": 82,
+                "stim_approach": 83,
+                "stim_avoidence": 84,
+                "resp_right": 85,
+                "resp_wrong": 86,
+                "resp_null": 87
+            }
         },
         "SM": {
             "dataprefix": "SM",
@@ -77,7 +141,16 @@
                 1,
                 2
             ],
-            "minevent": 156
+            "minevent": 156,
+            "triggermap": {
+                "start": 1,
+                "end": 2,
+                "stim_abstract": 3,
+                "stim_concrete": 4,
+                "stim_filler": 7,
+                "resp_right": 5,
+                "resp_wrong": 6
+            }
         },
         "TEST": {
             "dataprefix": "TEST",
@@ -85,7 +158,17 @@
                 8,
                 9
             ],
-            "minevent": 300
+            "minevent": 300,
+            "triggermap": {
+                "start": 8,
+                "end": 9,
+                "stim_old": 10,
+                "stim_new": 11,
+                "resp_d": 12,
+                "resp_f": 13,
+                "resp_j": 14,
+                "resp_k": 15
+            }
         }
     }
 ]
