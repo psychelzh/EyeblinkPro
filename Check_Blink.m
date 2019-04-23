@@ -3,9 +3,10 @@ function Check_Blink(taskname, start)
 %
 %The output res_description contains a variable 'Message', which codes the
 %checking results in following way:
-%   -1, denote 'later examination needed',
-%   0, denote 'not valid/bad fitness', and
-%   1, denote 'valid and accepted'.
+%   -2: 'later examination needed',
+%   -1: 'upper and lower is inverted',
+%    0: 'not valid/bad fitness', and
+%    1: denote 'valid and accepted'.
 %
 %See also eyeblinkplot
 
@@ -67,7 +68,7 @@ for i_subj = start:num_subj
     tasksetting.pid = EOG(i_subj).pid;
     if ~isempty(stat)
         eyeblinkplot(EOGv, stat, tasksetting);
-        inputprompt    = {'How about it? Message (-1=needs further examin, 0=no fitness, 1=okay):'};
+        inputprompt    = {'How about it? Message (-2=needs further examin, -1=up and down are inverted, 0=no fitness, 1=okay):'};
         inputtitle     = 'Record';
         num_lines      = 1;
         defans         = {'1'};
