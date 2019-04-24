@@ -1,10 +1,8 @@
 % All rights are reserved. (c) 2019 Liang Zhang (psychelzh@outlook.com)
-function blink_res = calc_blink(taskname)
+function blink_res = calc_blink(EOG)
 % This script is used to determine eye blink pattern in EOG dataset
 % Please run Extract_EOG before using this.
-data_path = 'EOG';
 h_log_err = fopen(fullfile('logs', 'readerror.log'), 'a');
-load(fullfile(data_path, sprintf('EOG_%s.mat', taskname))); %#ok<LOAD>
 nsubj      = length(EOG);
 % preallocate
 pid        = nan(nsubj, 1); %Participant ID
