@@ -1,12 +1,35 @@
 function Check_Blink(taskname, varargin)
 %CHECK_BLINK Checks the fitness of data subject by subject
+%   CHECK_BLINK(TASKNAME) checks blink detection results for the test with
+%   name specified with TASKNAME with a normal procedure.
+%   
+%   CHECK_BLINK(TASKNAME, 'Param1', val1, ...) enables you to specify some
+%   optional parameter name/value pairs to do more checking. Parameters
+%   are:
 %
-%The output res_description contains a variable 'Message', which codes the
-%checking results in following way:
-%   -2: 'later examination needed',
-%   -1: 'upper and lower is inverted',
-%    0: 'not valid/bad fitness', and
-%    1: denote 'valid and accepted'.
+%       'Recheck' -- a logical scalar or double vector with -2, -1, 0, 1
+%       values. It defaults to false, indicating this is the first check
+%       for all the subjects. After checking, the checking results are
+%       stored in the log with variable name of 'Message'. See the
+%       following what does each message mean. When specified as true, it
+%       means that this is a recheck and all subjects will be included.
+%       When specified as one or more values from -2, -1, 0, 1, only
+%       subjects whose first check results are the same as you specified
+%       will be included. Anyway, after rechecking, the checking results
+%       log will be added one variable with name 'Recheck'.
+%
+%       'SubjectList' -- a vector containing subject identifiers of
+%       interest.
+%
+%       'Start' -- a positive integer indicating which subject to start.
+%
+%   Note 1:
+%       The output checking result contains a variable 'Message', which
+%       codes the checking results in following way:
+%           -2 -- 'later examination needed',
+%           -1 -- 'upper and lower is inverted',
+%            0 -- 'not valid/bad fitness', and
+%            1 -- 'valid and accepted'.
 %
 %See also eyeblinkplot
 
