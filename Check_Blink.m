@@ -114,8 +114,10 @@ else
     load(fullfile('EOG', sprintf('EOG_%s', taskname)))
     load(fullfile('EOG', sprintf('blink_res_%s', taskname)))
 end
-blink_res.pid = [];
-EOG_blink = [struct2table(EOG), blink_res];
+if length(EOG) ~= height(blink_res)
+    error('EBR:Check_Blink:DatasetCorruption', ...
+        'The number of subjects in EOG and blink result do not match.')
+end
 
 % set subject list based on recheck setting if not specified
 store_rate = true; % used to indicate whether to store the finish rate
@@ -132,11 +134,11 @@ if is_recheck
     check_result.Recheck = check_result.Message;
     rows_to_check = ismember(check_result.Message, recheck);
 else
-    rows_to_check = true(height(EOG_blink), 1);
+    rows_to_check = true(height(blink_res), 1);
 end
 if ~isempty(sub_list)
     store_rate = false;
-    rows_to_check = rows_to_check & ismember(EOG_blink.pid, sub_list);
+    rows_to_check = rows_to_check & ismember(blink_res.pid, sub_list);
 end
 rows_to_check = find(rows_to_check);
 
@@ -165,7 +167,7 @@ if ~is_recheck
         fprintf('Try starting from subject %d.\n', start);
         fprintf('Reading existing check results from ''%s''.\n', check_result_log);
         check_result = readtable(check_result_log);
-        if ~isequal(check_result.pid, EOG_blink.pid)
+        if ~isequal(check_result.pid, blink_res.pid)
             warning('EBR:CHECK_BLINK:UnconsistentCheckResult', ...
                 'The subject identities in the check result are not consistent with those in `EOG`.')
             fprintf('Force to start from subject 1.\n')
@@ -176,7 +178,7 @@ if ~is_recheck
         start = 1;
     end
     if start == 1
-        check_result = table(EOG_blink.pid, nan(height(EOG_blink), 1), ...
+        check_result = table(blink_res.pid, nan(height(blink_res), 1), ...
             'VariableNames', {'pid', 'Message'});
     end
 end
@@ -184,7 +186,7 @@ end
 for i_subj = start:num_subj
     fprintf('Now processing subject %d, remaining %d subjects.\n', i_subj, num_subj - i_subj);
     row_to_check = rows_to_check(i_subj);
-    stat = EOG_blink.stat{row_to_check};
+    stat = blink_res.stat{row_to_check};
     if isempty(stat)
         fprintf('No data for this subject. Continue to the next.\n');
         switch is_recheck
@@ -195,8 +197,8 @@ for i_subj = start:num_subj
         end
         continue
     end
-    EOGv = EOG_blink.EOGv{row_to_check};
-    tasksetting.pid = EOG_blink.pid(row_to_check);
+    EOGv = EOG(row_to_check).EOGv;
+    tasksetting.pid = blink_res.pid(row_to_check);
     eyeblinkplot(EOGv, stat, tasksetting);
     if is_glance
         continue
