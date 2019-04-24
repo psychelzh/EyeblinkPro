@@ -23,10 +23,14 @@ function Check_Blink(taskname, varargin)
 %
 %       'Start' -- a positive integer indicating which subject to start.
 %
-%       'Glance' -- logical scalar indicate if this is just a "glance" of
+%       'Glance' -- logical scalar indicates if this is just a "glance" of
 %       the result. If true, there won't be a dialogue to ask for checking
 %       results, so that there is no results recorded. It defaults to
 %       false.
+%
+%       'Repaired' -- logical scalar indicates if this is to check the
+%       blink detection after EOG data is repaired. It defaults to false.
+%       When set as true, it will read dataset with suffix "repaired".
 %
 %   Note 1:
 %       The output checking result contains a variable 'Message', which
@@ -54,12 +58,14 @@ p.addParameter('SubjectList', [], ...
 p.addParameter('Start', [], ...
     @(x) validateattributes(x, {'numeric'}, {'scalar', 'positive', 'integer'}));
 p.addParameter('Glance', false, @(x) isscalar(x) && islogical(x))
+p.addParameter('Repaired', false, @(x) isscalar(x) && islogical(x))
 parse(p, taskname, varargin{:});
 taskname = p.Results.TaskName;
 recheck = p.Results.Recheck;
 sub_list = p.Results.SubjectList;
 start = p.Results.Start;
 is_glance = p.Results.Glance;
+is_repaired = p.Results.Repaired;
 
 % judge recheck status
 if islogical(recheck)
@@ -76,8 +82,13 @@ tasksetting = get_config(taskname);
 
 % initialize logging file
 log_dir = 'logs';
-check_result_log = fullfile(log_dir, sprintf('check_results_%s.txt', taskname));
-completion_log = fullfile(log_dir, sprintf('completion_%s', taskname));
+if is_repaired
+    check_result_log = fullfile(log_dir, sprintf('check_results_%s_repaired.txt', taskname));
+    completion_log = fullfile(log_dir, sprintf('completion_%s_repaired', taskname));
+else
+    check_result_log = fullfile(log_dir, sprintf('check_results_%s.txt', taskname));
+    completion_log = fullfile(log_dir, sprintf('completion_%s', taskname));
+end
 
 % throw an error when to do recheck before first check is finished
 if is_recheck
@@ -96,8 +107,13 @@ if is_recheck
 end
 
 % load data and merge them
-load(fullfile('EOG', sprintf('EOG_%s', taskname))) %#ok<*LOAD>
-load(fullfile('EOG', sprintf('blink_res_%s', taskname)))
+if is_repaired
+    load(fullfile('EOG', sprintf('EOG_%s_repaired', taskname))) %#ok<*LOAD>
+    load(fullfile('EOG', sprintf('blink_res_%s_repaired', taskname)))
+else
+    load(fullfile('EOG', sprintf('EOG_%s', taskname)))
+    load(fullfile('EOG', sprintf('blink_res_%s', taskname)))
+end
 blink_res.pid = [];
 EOG_blink = [struct2table(EOG), blink_res];
 
