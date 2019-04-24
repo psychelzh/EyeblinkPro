@@ -195,9 +195,9 @@ for i_subj = start:num_subj
     if store_rate
         dlmwrite(completion_log, i_subj);
     end
-end
-%Output the results into an Excel file.
+    % output the results into a file with tsv format
 writetable(check_result, check_result_log, 'Delimiter', '\t');
+end
 % store 0 to completion log when all are done
 if store_rate && i_subj == num_subj && ~isempty(userinput)
     dlmwrite(completion_log, 0);
