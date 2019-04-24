@@ -23,6 +23,11 @@ function Check_Blink(taskname, varargin)
 %
 %       'Start' -- a positive integer indicating which subject to start.
 %
+%       'Glance' -- logical scalar indicate if this is just a "glance" of
+%       the result. If true, there won't be a dialogue to ask for checking
+%       results, so that there is no results recorded. It defaults to
+%       false.
+%
 %   Note 1:
 %       The output checking result contains a variable 'Message', which
 %       codes the checking results in following way:
@@ -48,11 +53,13 @@ p.addParameter('SubjectList', [], ...
     @(x) validateattributes(x, {'numeric'}, {'positive', 'integer'}));
 p.addParameter('Start', [], ...
     @(x) validateattributes(x, {'numeric'}, {'scalar', 'positive', 'integer'}));
+p.addParameter('Glance', false, @(x) isscalar(x) && islogical(x))
 parse(p, taskname, varargin{:});
 taskname = p.Results.TaskName;
 recheck = p.Results.Recheck;
 sub_list = p.Results.SubjectList;
 start = p.Results.Start;
+is_glance = p.Results.Glance;
 
 % judge recheck status
 if islogical(recheck)
@@ -101,7 +108,7 @@ if is_recheck
     fprintf('Begin rechecking.\n')
     fprintf('Reading first check results from ''%s''.\n', check_result_log);
     check_result = readtable(check_result_log);
-    if ismember('Recheck', check_result.Properties.VariableNames)
+    if ~is_glance && ismember('Recheck', check_result.Properties.VariableNames)
         rmpath scripts
         error('EBR:Check_Blink:DupRecheck', ...
             'Seemingly one recheck has been done. Please delete those logs before rechecking.')
@@ -117,9 +124,10 @@ if ~isempty(sub_list)
 end
 rows_to_check = find(rows_to_check);
 
-% if not in recheck, start could be recovered from file
+% if not in recheck or glance, start could be recovered from file
 if isempty(start)
-    if exist(completion_log, 'file') && ~is_recheck
+    if ~is_glance && ~is_recheck && exist(completion_log, 'file')
+        fprintf('Seemingly you are trying to continue the last work, recovering...\n')
         start = load(completion_log);
         if start == 0
             fprintf('Log file ''%s'' indicates the checking has completed. Exiting.\n', ...
@@ -174,6 +182,9 @@ for i_subj = start:num_subj
     EOGv = EOG_blink.EOGv{row_to_check};
     tasksetting.pid = EOG_blink.pid(row_to_check);
     eyeblinkplot(EOGv, stat, tasksetting);
+    if is_glance
+        continue
+    end
     inputprompt    = {'How about it? Message (-2=needs further examin, -1=up and down are inverted, 0=no fitness, 1=okay):'};
     inputtitle     = 'Record';
     num_lines      = 1;
@@ -196,7 +207,7 @@ for i_subj = start:num_subj
         dlmwrite(completion_log, i_subj);
     end
     % output the results into a file with tsv format
-writetable(check_result, check_result_log, 'Delimiter', '\t');
+    writetable(check_result, check_result_log, 'Delimiter', '\t');
 end
 % store 0 to completion log when all are done
 if store_rate && i_subj == num_subj && ~isempty(userinput)
