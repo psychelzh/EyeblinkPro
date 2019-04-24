@@ -75,12 +75,14 @@ completion_log = fullfile(log_dir, sprintf('completion_%s', taskname));
 % throw an error when to do recheck before first check is finished
 if is_recheck
     if ~exist(check_result_log, 'file')
+        rmpath scripts
         error('EBR:Check_Blink:NoCheckResultsFound', ...
             'When rechecking, we need the original check results in file ''%s''.', ...
             check_result_log)
     end
     completion_first_check = load(completion_log);
     if completion_first_check ~= 0
+        rmpath scripts
         error('EBR:Check_Blink:FirstCheckNotFinished', ...
             'When rechecking, the first check should have been finished.')
     end
@@ -102,6 +104,7 @@ if is_recheck
     fprintf('Reading first check results from ''%s''.\n', check_result_log);
     check_result = readtable(check_result_log);
     if ismember('Recheck', check_result.Properties.VariableNames)
+        rmpath scripts
         error('EBR:Check_Blink:DupRecheck', ...
             'Seemingly one recheck has been done. Please delete those logs before rechecking.')
     end
