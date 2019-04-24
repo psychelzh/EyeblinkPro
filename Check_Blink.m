@@ -2,7 +2,7 @@ function Check_Blink(taskname, varargin)
 %CHECK_BLINK Checks the fitness of data subject by subject
 %   CHECK_BLINK(TASKNAME) checks blink detection results for the test with
 %   name specified with TASKNAME with a normal procedure.
-%   
+%
 %   CHECK_BLINK(TASKNAME, 'Param1', val1, ...) enables you to specify some
 %   optional parameter name/value pairs to do more checking. Parameters
 %   are:
@@ -91,15 +91,13 @@ end
 % load data and merge them
 load(fullfile('EOG', sprintf('EOG_%s', taskname))) %#ok<*LOAD>
 load(fullfile('EOG', sprintf('blink_res_%s', taskname)))
-EOG_blink = outerjoin(struct2table(EOG), blink_res, ...
-    'Keys', 'pid', 'MergeKeys', true, ...
-    'LeftVariables', {'pid', 'fsample', 'event', 'EOGv'}, ...
-    'RightVariables', {'pid', 'stat'});
+blink_res.pid = [];
+EOG_blink = [struct2table(EOG), blink_res];
 
 % set subject list based on recheck setting if not specified
 store_rate = true; % used to indicate whether to store the finish rate
 if is_recheck
-    store_rate = false; 
+    store_rate = false;
     fprintf('Begin rechecking.\n')
     fprintf('Reading first check results from ''%s''.\n', check_result_log);
     check_result = readtable(check_result_log);
@@ -114,7 +112,7 @@ else
     rows_to_check = true(height(EOG_blink), 1);
 end
 if ~isempty(sub_list)
-    store_rate = false; 
+    store_rate = false;
     rows_to_check = rows_to_check & ismember(EOG_blink.pid, sub_list);
 end
 rows_to_check = find(rows_to_check);
