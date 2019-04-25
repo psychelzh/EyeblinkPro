@@ -131,13 +131,22 @@ if is_recheck
     fprintf('Begin rechecking.\n')
     fprintf('Reading first check results from ''%s''.\n', check_result_log);
     check_result = readtable(check_result_log);
-    if ~is_glance && ismember('Recheck', check_result.Properties.VariableNames)
-        rmpath scripts
-        error('EBR:Check_Blink:DupRecheck', ...
-            'Seemingly one recheck has been done. Please delete those logs before rechecking.')
+    if is_glance
+        if ismember('Recheck', check_result.Properties.VariableNames)
+            rows_to_check = ismember(check_result.Recheck, recheck);
+        else
+            rows_to_check = ismember(check_result.Message, recheck);
+        end
+    else
+        if ismember('Recheck', check_result.Properties.VariableNames)
+            rmpath scripts
+            error('EBR:Check_Blink:DupRecheck', ...
+                'Seemingly one recheck has been done. Please delete those logs before rechecking.')
+        else
+            check_result.Recheck = check_result.Message;
+            rows_to_check = ismember(check_result.Message, recheck);
+        end
     end
-    check_result.Recheck = check_result.Message;
-    rows_to_check = ismember(check_result.Message, recheck);
 else
     rows_to_check = true(height(blink_res), 1);
 end
