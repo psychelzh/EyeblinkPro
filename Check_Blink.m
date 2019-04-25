@@ -32,6 +32,10 @@ function Check_Blink(taskname, varargin)
 %       blink detection after EOG data is repaired. It defaults to false.
 %       When set as true, it will read dataset with suffix "repaired".
 %
+%       'Force' -- logical scalar indicates if the recheck will be forced
+%       to execute even if there exists rechecking data. In this way, the
+%       old rechecking results will be erased.
+%
 %   Note 1:
 %       The output checking result contains a variable 'Message', which
 %       codes the checking results in following way:
@@ -59,6 +63,7 @@ p.addParameter('Start', [], ...
     @(x) validateattributes(x, {'numeric'}, {'scalar', 'positive', 'integer'}));
 p.addParameter('Glance', false, @(x) isscalar(x) && islogical(x))
 p.addParameter('Repaired', false, @(x) isscalar(x) && islogical(x))
+p.addParameter('Force', false, @(x) isscalar(x) && islogical(x))
 parse(p, taskname, varargin{:});
 taskname = p.Results.TaskName;
 recheck = p.Results.Recheck;
@@ -66,6 +71,7 @@ sub_list = p.Results.SubjectList;
 start = p.Results.Start;
 is_glance = p.Results.Glance;
 is_repaired = p.Results.Repaired;
+is_forced = p.Results.Force;
 
 % judge recheck status
 if islogical(recheck)
@@ -138,7 +144,8 @@ if is_recheck
             rows_to_check = ismember(check_result.Message, recheck);
         end
     else
-        if ismember('Recheck', check_result.Properties.VariableNames)
+        if ~is_forced && ...
+                ismember('Recheck', check_result.Properties.VariableNames)
             rmpath scripts
             error('EBR:Check_Blink:DupRecheck', ...
                 'Seemingly one recheck has been done. Please delete those logs before rechecking.')
