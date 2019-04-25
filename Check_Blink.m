@@ -119,10 +119,15 @@ if length(EOG) ~= height(blink_res)
         'The number of subjects in EOG and blink result do not match.')
 end
 
-% set subject list based on recheck setting if not specified
-store_rate = true; % used to indicate whether to store the finish rate
-if is_recheck
+% when in glance, recheck or a customed sublist, do not store finish rate
+if is_recheck || is_glance || ~isempty(sub_list)
     store_rate = false;
+else
+    store_rate = true;
+end
+
+% set subject list based on recheck setting if not specified
+if is_recheck
     fprintf('Begin rechecking.\n')
     fprintf('Reading first check results from ''%s''.\n', check_result_log);
     check_result = readtable(check_result_log);
@@ -137,7 +142,6 @@ else
     rows_to_check = true(height(blink_res), 1);
 end
 if ~isempty(sub_list)
-    store_rate = false;
     rows_to_check = rows_to_check & ismember(blink_res.pid, sub_list);
 end
 rows_to_check = find(rows_to_check);
