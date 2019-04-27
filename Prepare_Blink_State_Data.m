@@ -2,12 +2,10 @@
 %
 % This script is used to transform matlab's complex data structure to an
 % easy to read tabular data and output it to a tsv format file.
-
-% TODO: transform this to a function to analyze every task
+function Prepare_Blink_State_Data(taskname)
 addpath scripts
 % merge EOG data and calculated blink results
 data_path = 'EOG';
-taskname = 'FLT';
 % get the trigger mapping of value and name
 tasksetting = get_config(taskname);
 trigger_map_config = struct2table(tasksetting.triggermap);
@@ -15,7 +13,7 @@ trigger_map_table = stack(trigger_map_config, 1:width(trigger_map_config), ...
     'IndexVariableName', 'name', 'NewDataVariableName', 'key');
 trigger_map = containers.Map(mod(trigger_map_table.key, 16) * 16 + 15, ...
     cellstr(trigger_map_table.name));
-load(fullfile(data_path, sprintf('blink_res_%s', taskname)))
+load(fullfile(data_path, sprintf('blink_res_%s', taskname))) %#ok<*LOAD>
 load(fullfile(data_path, sprintf('EOG_%s', taskname)))
 data_this_task = outerjoin(struct2table(EOG), blink_res, ...
     'Keys', 'pid', 'MergeKeys', true, ...
