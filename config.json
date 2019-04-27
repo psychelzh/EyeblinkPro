@@ -60,7 +60,7 @@
                 "start": 1,
                 "close": 2,
                 "open": 3,
-                "end": 4
+                "ending": 4
             }
         },
         "RLA": {
@@ -72,7 +72,7 @@
             "minevent": 120,
             "triggermap": {
                 "start": 1,
-                "end": 2,
+                "ending": 2,
                 "stim_onset": 6,
                 "resp_win": 7,
                 "resp_lose": 8,
@@ -91,7 +91,7 @@
             "minevent": 48,
             "triggermap": {
                 "start": 81,
-                "end": 82,
+                "ending": 82,
                 "stim_approach": 83,
                 "stim_avoidence": 84,
                 "resp_right": 85,
@@ -108,7 +108,7 @@
             "minevent": 120,
             "triggermap": {
                 "start": 1,
-                "end": 2,
+                "ending": 2,
                 "stim_onset": 6,
                 "resp_win": 7,
                 "resp_lose": 8,
@@ -127,7 +127,7 @@
             "minevent": 48,
             "triggermap": {
                 "start": 81,
-                "end": 82,
+                "ending": 82,
                 "stim_approach": 83,
                 "stim_avoidence": 84,
                 "resp_right": 85,
@@ -144,7 +144,7 @@
             "minevent": 156,
             "triggermap": {
                 "start": 1,
-                "end": 2,
+                "ending": 2,
                 "stim_abstract": 3,
                 "stim_concrete": 4,
                 "stim_filler": 7,
@@ -161,7 +161,7 @@
             "minevent": 300,
             "triggermap": {
                 "start": 8,
-                "end": 9,
+                "ending": 9,
                 "stim_old": 10,
                 "stim_new": 11,
                 "resp_d": 12,
