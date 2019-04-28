@@ -46,7 +46,7 @@ for i_suffix = 1:length(data_suffix)
     blink_res{i_suffix} = data_content.blink_res;
     clearvars('data_content')
 end
-EOG = cat(1, EOG{:});
+EOG = cat(2, EOG{:});
 blink_res = cat(1, blink_res{:});
 num_subj = height(blink_res);
 for i_subj = 1:num_subj
