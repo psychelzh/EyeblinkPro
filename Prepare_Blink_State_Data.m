@@ -15,16 +15,12 @@ trigger_map = containers.Map(mod(trigger_map_table.key, 16) * 16 + 15, ...
     cellstr(trigger_map_table.name));
 load(fullfile(data_path, sprintf('blink_res_%s', taskname))) %#ok<*LOAD>
 load(fullfile(data_path, sprintf('EOG_%s', taskname)))
-data_this_task = outerjoin(struct2table(EOG), blink_res, ...
-    'Keys', 'pid', 'MergeKeys', true, ...
-    'LeftVariables', {'pid', 'fsample', 'event', 'EOGv'}, ...
-    'RightVariables', {'pid', 'stat'});
-num_subj = height(data_this_task);
+num_subj = height(blink_res);
 event = table;
 for i_subj = 1:num_subj
-    event_subj = data_this_task.event{i_subj};
-    stat_subj = data_this_task.stat{i_subj};
-    EOGv_subj = data_this_task.EOGv{i_subj};
+    event_subj = EOG(i_subj).event;
+    stat_subj = blink_res.stat{i_subj};
+    EOGv_subj = EOG(i_subj).EOGv;
     if isempty(event_subj)
         continue
     end
@@ -87,7 +83,7 @@ for i_subj = 1:num_subj
             trial_id = 0;
         end
     end
-    event_subj.pid = repmat(data_this_task.pid(i_subj), height(event_subj), 1);
+    event_subj.pid = repmat(blink_res.pid(i_subj), height(event_subj), 1);
     event_subj = event_subj(:, {'pid', 'trl', 'trial', 'type', 'name', 'value', 'time'});
     event = cat(1, event, event_subj);
 end
