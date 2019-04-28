@@ -26,10 +26,19 @@ for i_suffix = 1:length(data_suffix)
         data_content_raw = load(fullfile(data_path, ...
             sprintf('%s_%s%s', data_name, taskname, data_suffix{i_suffix})));
         data_finally = data_content_raw.(data_name);
-        if ismember('Recheck', check_res.Properties.VariableNames)
-            data_finally(ismember(check_res.Recheck, -2:0), :) = [];
-        else
-            data_finally(ismember(check_res.Message, -2:0), :) = [];
+        switch data_name
+            case 'EOG'
+                if ismember('Recheck', check_res.Properties.VariableNames)
+                    data_finally(ismember(check_res.Recheck, -2:0)) = [];
+                else
+                    data_finally(ismember(check_res.Message, -2:0)) = [];
+                end
+            case 'blink_res'
+                if ismember('Recheck', check_res.Properties.VariableNames)
+                    data_finally(ismember(check_res.Recheck, -2:0), :) = [];
+                else
+                    data_finally(ismember(check_res.Message, -2:0), :) = [];
+                end
         end
         data_content.(data_name) = data_finally;
     end
