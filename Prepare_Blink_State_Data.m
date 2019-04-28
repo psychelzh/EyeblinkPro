@@ -4,8 +4,8 @@
 % easy to read tabular data and output it to a tsv format file.
 function Prepare_Blink_State_Data(taskname)
 addpath scripts
-% merge EOG data and calculated blink results
 data_path = 'EOG';
+log_path = 'logs';
 % get the trigger mapping of value and name
 tasksetting = get_config(taskname);
 trigger_map_config = struct2table(tasksetting.triggermap);
@@ -13,8 +13,32 @@ trigger_map_table = stack(trigger_map_config, 1:width(trigger_map_config), ...
     'IndexVariableName', 'name', 'NewDataVariableName', 'key');
 trigger_map = containers.Map(mod(trigger_map_table.key, 16) * 16 + 15, ...
     cellstr(trigger_map_table.name));
-load(fullfile(data_path, sprintf('blink_res_%s', taskname))) %#ok<*LOAD>
-load(fullfile(data_path, sprintf('EOG_%s', taskname)))
+% merge original data and repaired data
+data_suffix = {'', '_repaired'};
+data_names = {'EOG', 'blink_res'};
+blink_res = cell(length(data_suffix), 1);
+EOG = cell(length(data_suffix), 1);
+for i_suffix = 1:length(data_suffix)
+    check_res = readtable(fullfile(log_path, ...
+        sprintf('check_results_%s%s.txt', taskname, data_suffix{i_suffix})));
+    for i_data_name = 1:length(data_names)
+        data_name = data_names{i_data_name};
+        data_content_raw = load(fullfile(data_path, ...
+            sprintf('%s_%s%s', data_name, taskname, data_suffix{i_suffix})));
+        data_finally = data_content_raw.(data_name);
+        if ismember('Recheck', check_res.Properties.VariableNames)
+            data_finally(ismember(check_res.Recheck, -2:0), :) = [];
+        else
+            data_finally(ismember(check_res.Message, -2:0), :) = [];
+        end
+        data_content.(data_name) = data_finally;
+    end
+    EOG{i_suffix} = data_content.EOG;
+    blink_res{i_suffix} = data_content.blink_res;
+    clearvars('data_content')
+end
+EOG = cat(1, EOG{:});
+blink_res = cat(1, blink_res{:});
 num_subj = height(blink_res);
 for i_subj = 1:num_subj
     event_subj = EOG(i_subj).event;
