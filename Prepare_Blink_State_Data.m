@@ -16,7 +16,6 @@ trigger_map = containers.Map(mod(trigger_map_table.key, 16) * 16 + 15, ...
 load(fullfile(data_path, sprintf('blink_res_%s', taskname))) %#ok<*LOAD>
 load(fullfile(data_path, sprintf('EOG_%s', taskname)))
 num_subj = height(blink_res);
-event = table;
 for i_subj = 1:num_subj
     event_subj = EOG(i_subj).event;
     stat_subj = blink_res.stat{i_subj};
@@ -84,8 +83,8 @@ for i_subj = 1:num_subj
         end
     end
     event_subj.pid = repmat(blink_res.pid(i_subj), height(event_subj), 1);
-    event_subj = event_subj(:, {'pid', 'trl', 'trial', 'type', 'name', 'value', 'time'});
-    event = cat(1, event, event_subj);
+    event_subj.task = repmat({taskname}, height(event_subj), 1);
+    event_subj = event_subj(:, {'pid', 'task', 'trl', 'trial', 'type', 'name', 'value', 'time'});
+    writetable(event_subj, fullfile(data_path, 'events', sprintf('event_%s_sub%d.txt', taskname, blink_res.pid(i_subj))), 'Delimiter', '\t')
 end
-writetable(event, fullfile(data_path, sprintf('event_%s.txt', taskname)), 'Delimiter', '\t')
 rmpath scripts
