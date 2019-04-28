@@ -49,6 +49,7 @@ end
 EOG = cat(2, EOG{:});
 blink_res = cat(1, blink_res{:});
 num_subj = height(blink_res);
+event = cell(num_subj, 1);
 for i_subj = 1:num_subj
     event_subj = EOG(i_subj).event;
     stat_subj = blink_res.stat{i_subj};
@@ -118,6 +119,8 @@ for i_subj = 1:num_subj
     event_subj.pid = repmat(blink_res.pid(i_subj), height(event_subj), 1);
     event_subj.task = repmat({taskname}, height(event_subj), 1);
     event_subj = event_subj(:, {'pid', 'task', 'trl', 'trial', 'type', 'name', 'value', 'time'});
-    writetable(event_subj, fullfile(data_path, 'events', sprintf('event_%s_sub%d.txt', taskname, blink_res.pid(i_subj))), 'Delimiter', '\t')
+    event{i_subj} = event_subj;
 end
+event = cat(1, event{:});
+writetable(event, fullfile(data_path, 'events', sprintf('event_%s.txt', taskname)), 'Delimiter', '\t')
 rmpath scripts
