@@ -20,4 +20,3 @@ for i_modified_field = 1:length(modified_fields)
     modified_field = modified_fields{i_modified_field};
     tasksetting.(modified_field) = tasksetting_update.(modified_field);
 end
-
